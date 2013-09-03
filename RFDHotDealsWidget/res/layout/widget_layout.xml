@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/newsfeed_parent"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:layout_margin="@dimen/widget_margin" >
+
+    <RelativeLayout
+        android:id="@+id/header"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/widget_header_background" >
+
+        
+        <TextView
+            android:id="@+id/smallText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingTop="6dp"
+            android:paddingBottom="0dp"
+            android:paddingLeft="7dp"
+            android:text="@string/rfd"
+            android:layout_marginBottom="-8dp"
+            android:textSize="10sp"
+            android:textStyle="bold" 
+            android:textColor="#FFFFFF" />
+        
+
+        <ImageButton
+            android:id="@+id/settings"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_centerVertical="true"
+            android:background="@null"
+            android:paddingRight="6dp"
+            android:src="@drawable/ic_action_settings" />
+
+        <ImageButton
+            android:id="@+id/refresh"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:layout_toLeftOf="@id/settings"
+            android:background="@null"
+            android:paddingRight="3dp"
+            android:src="@drawable/ic_action_refresh" />
+        
+        <TextView
+            android:id="@+id/bigText"
+            android:maxLines="1"
+            android:ellipsize="marquee"
+            android:layout_below="@id/smallText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="left"
+            android:layout_alignParentLeft="true"
+            android:layout_toLeftOf="@id/refresh"
+            android:paddingLeft="5dp"
+            android:paddingBottom="4dp"
+            android:text="@string/hot_deals"
+            android:textAppearance="?android:attr/textAppearanceLarge"
+            android:textColor="#FFFFFF" />
+        
+    </RelativeLayout>
+
+    <FrameLayout
+        android:id="@+id/headerShadow"
+        android:layout_width="match_parent"
+        android:layout_height="3dp"
+        android:layout_below="@id/header"
+        android:background="@drawable/widget_header_shadow" />
+
+    <TextView
+        android:id="@+id/footer"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:background="@drawable/widget_header_background"
+        android:gravity="right"
+        android:paddingLeft="6dp"
+        android:paddingRight="6dp"
+        android:text="@string/please_wait_"
+        android:textColor="#FFFFFF"
+        android:textSize="10sp" 
+        android:maxLines="1"
+        android:singleLine="true"/>
+
+    <FrameLayout
+        android:id="@+id/footerShadow"
+        android:layout_width="match_parent"
+        android:layout_height="3dp"
+        android:layout_above="@id/footer"
+        android:background="@drawable/widget_footer_shadow" />
+
+    <ListView
+        android:id="@+id/newsfeed"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_above="@id/footerShadow"
+        android:layout_below="@id/headerShadow"
+        android:layout_marginLeft="2dp"
+        android:layout_marginRight="2dp"
+        android:dividerHeight="2dp"
+        android:orientation="vertical"
+        android:padding="@dimen/widget_margin" />
+
+    <TextView
+        android:id="@+id/empty_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="center"
+        android:text="Loading feed..."
+        android:textColor="#ffffff"
+        android:textSize="20sp"
+        android:textStyle="bold" />
+
+</RelativeLayout>

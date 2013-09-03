@@ -1,0 +1,21 @@
+<resources>
+
+    <string name="app_name">RFD Hot Deals Widget</string>
+    <string name="no_data_available">No data available</string>
+    <string name="key_edittext_smalltitle">edittext_smalltitle</string>
+    <string name="small_text_default">RFD</string>
+    <string name="big_text_default">Hot Deals</string>
+    <string name="key_edittext_bigtitle">edittext_bigtitle</string>
+    <string name="key_refresh_frequency">key_refresh_frequency</string>
+    <string name="key_rssfeedurl">key_rssfeedurl</string>
+    <string name="please_wait_">Please Wait...</string>
+    <string name="hot_deals">Hot Deals</string>
+    <string name="rfd">RFD</string>
+    <string name="customize_small_title">Customize Small Title</string>
+    <string name="customize_big_title">Customize Big Title</string>
+    <string name="summary_rss_feed_url">For this widget instance, you can specify a different RSS Feed source other than the default one</string>
+    <string name="summary_small_title">Edit the small title other than the default one</string>
+    <string name="summary_big_title">Edit the big title other than the default one</string>
+    <string name="summary_refresh_frequency">Choose how often the RSS Feed will be automatically polled</string>
+
+</resources>
