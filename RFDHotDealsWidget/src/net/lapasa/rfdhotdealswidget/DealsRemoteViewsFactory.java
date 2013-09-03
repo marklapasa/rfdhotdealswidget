@@ -111,29 +111,32 @@ class DealsRemoteViewsFactory implements RemoteViewsService.RemoteViewsFactory
 	@Override
 	public RemoteViews getViewAt(int position)
 	{
-		// position will always range from 0 to getCount() - 1.
-
-		// We construct a remote views item based on our widget item xml file,
-		// and set the
-		// text based on the position.
-		RemoteViews rv = new RemoteViews(context.getPackageName(), R.layout.news_item);
 		NewsItem newsItem = list.get(position);
-		String dateStrCurrent = newsItem.getFormattedDate(context);
 
-		Bitmap bitmap = newsItem.getImage();
-		if (bitmap != null)
-		{
-			rv.setImageViewBitmap(R.id.image, bitmap);
-		}
-		else
-		{
-			rv.setImageViewBitmap(R.id.image, null);
-		}
+		RemoteViews rv = new RemoteViews(context.getPackageName(), R.layout.news_item);
 		
 		
+
+		// Set the cached thumbnail
+//		Bitmap bitmap = newsItem.getImage();
+//		if (bitmap != null)
+//		{
+//			rv.setImageViewBitmap(R.id.image, bitmap);
+//		}
+//		else
+//		{
+//			rv.setImageViewBitmap(R.id.image, null);
+//		}
+		
+		
+		// Set the title
 		rv.setTextViewText(R.id.title, newsItem.getTitle());
+		
+		// Set the first couple of lines of the news item description
 		rv.setTextViewText(R.id.body, newsItem.getBody());
 
+		// Set the date
+		String dateStrCurrent = newsItem.getFormattedDate(context);
 		rv.setTextViewText(R.id.date, dateStrCurrent);
 
 		// Create illusion of grouping by time
@@ -198,6 +201,7 @@ class DealsRemoteViewsFactory implements RemoteViewsService.RemoteViewsFactory
 	 */
 	public void onDataSetChanged()
 	{
+		
 		Log.d(TAG, "onDataSetChanged(): Retriving RSS News Items");
 		// if offline,
 		// Open a connection to the local database

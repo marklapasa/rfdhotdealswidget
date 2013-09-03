@@ -33,8 +33,20 @@ public class NewsItem
 
 	public NewsItem(RssItem rssItem)
 	{
-		this.rssItem = rssItem;
-		date = rssItem.getPubDate();
+		if (rssItem == null)
+		{
+			this.rssItem = new RssItem();
+			this.rssItem.setTitle("$Title");
+			this.rssItem.setPubDate(new Date());
+			this.rssItem.setDescription("$Desc");
+			this.rssItem.setLink("$Link");
+		}
+		else
+		{
+			this.rssItem = rssItem;	
+		}
+		
+		date = this.rssItem.getPubDate();
 		Log.d(TAG, getTimeOnly());
 
 		if (getImageUrl() != null)
