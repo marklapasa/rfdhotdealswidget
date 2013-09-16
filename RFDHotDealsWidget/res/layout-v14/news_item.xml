@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/newsItem"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical" >
+
+    <TextView
+        android:id="@+id/date"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/widget_item_date_background"
+        android:padding="3dp"
+        android:text="$Date"
+        android:textColor="#FFFFFF"
+        android:textSize="11dp" />
+
+    <RelativeLayout
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/date"
+        android:background="@drawable/widget_item_title_background" 
+        android:paddingLeft="13dp">
+
+        <!-- Title -->
+        <TextView
+            android:id="@+id/title"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_toRightOf="@id/image"
+            android:paddingRight="13dp"
+            android:paddingTop="3dp"
+            android:textColor="#FF000000"
+            android:textSize="11sp"
+            android:textStyle="bold" />
+
+        <!-- Body -->
+        <TextView
+            android:id="@+id/body"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/title"
+            android:layout_toRightOf="@id/image"
+            android:ellipsize="end"
+            android:maxLength="105"
+            android:maxLines="2"
+            android:paddingBottom="3dp"
+            android:paddingRight="15dp"
+            android:textColor="#FF000000"
+            android:textSize="11sp" />
+    </RelativeLayout>
+
+</RelativeLayout>
