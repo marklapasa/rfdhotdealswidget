@@ -10,7 +10,7 @@
         android:title="Rate This Widget" >
         <intent
             android:action="android.intent.action.VIEW"
-            android:data="market://details?id=net.lapasa.vocaltweet" />
+            android:data="market://details?id=net.lapasa.rfdhotdealswidget" />
     </PreferenceScreen>
 
     <PreferenceCategory android:title="Widget Settings">
