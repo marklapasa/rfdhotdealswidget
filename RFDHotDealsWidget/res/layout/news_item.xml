@@ -24,11 +24,12 @@
         <ImageView
             android:id="@+id/image"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_height="fill_parent"
             android:paddingRight="3dp"
             android:paddingBottom="3dp"
             android:paddingLeft="13dp"
-            android:paddingTop="3dp" />
+            android:paddingTop="3dp"
+             />
 
         <!-- Title -->
         <TextView

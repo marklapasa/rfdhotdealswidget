@@ -1,6 +1,10 @@
 package net.lapasa.rfdhotdealswidget;
 
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
@@ -17,10 +21,9 @@ import android.appwidget.AppWidgetManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.content.SharedPreferences.Editor;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -40,6 +43,7 @@ class DealsRemoteViewsFactory implements RemoteViewsService.RemoteViewsFactory
 	private int widgetId;
 	private List<NewsItem> list = new ArrayList<NewsItem>();
 	private SharedPreferences prefs;
+	private File directory;
 
 	public DealsRemoteViewsFactory(Context context, Intent intent)
 	{
@@ -47,43 +51,15 @@ class DealsRemoteViewsFactory implements RemoteViewsService.RemoteViewsFactory
 		widgetId = intent.getIntExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, AppWidgetManager.INVALID_APPWIDGET_ID);
 		prefs = context.getSharedPreferences(DealsWidgetProvider.NAMESPACE + widgetId, Context.MODE_PRIVATE);
 		Log.d(TAG, "Created DealsRemoteViewsFactory for widgetId = " + widgetId);
+		
+		directory = context.getFilesDir();
 
 	}
 
 	/**
 	 * Setup any connections/cursors to data source.
 	 */
-	@Override
-	public void onCreate()
-	{
-		// In onCreate() you setup any connections / cursors to your data
-		// source. Heavy lifting,
-		// for example downloading or creating content etc, should be deferred
-		// to onDataSetChanged()
-		// or getViewAt(). Taking more than 20 seconds in this call will result
-		// in an ANR.
-
-		// list.add(new NewsItem("#Title0", "#Body0", Calendar.getInstance()));
-		// list.add(new NewsItem("#Title1", "#Body1", Calendar.getInstance()));
-
-		// We sleep for 3 seconds here to show how the empty view appears in the
-		// interim.
-		// The empty view is set in the StackWidgetProvider and should be a
-		// sibling of the
-		// collection view.
-		
-		/*
-		try
-		{
-			Thread.sleep(3000);
-		}
-		catch (InterruptedException e)
-		{
-			e.printStackTrace();
-		}
-		*/
-
-	}
+	public void onCreate(){}
 
 	public int getCount()
 	{
@@ -115,20 +91,9 @@ class DealsRemoteViewsFactory implements RemoteViewsService.RemoteViewsFactory
 
 		RemoteViews rv = new RemoteViews(context.getPackageName(), R.layout.news_item);
 		
-		
-
-		// Set the cached thumbnail
-//		Bitmap bitmap = newsItem.getImage();
-//		if (bitmap != null)
-//		{
-//			rv.setImageViewBitmap(R.id.image, bitmap);
-//		}
-//		else
-//		{
-//			rv.setImageViewBitmap(R.id.image, null);
-//		}
-		
-		
+				 
+		setIconOnNewsItem(newsItem, rv);
+		 
 		// Set the title
 		rv.setTextViewText(R.id.title, newsItem.getTitle());
 		
@@ -180,6 +145,50 @@ class DealsRemoteViewsFactory implements RemoteViewsService.RemoteViewsFactory
 		return rv;
 	}
 
+	private void setIconOnNewsItem(NewsItem newsItem, RemoteViews rv)
+	{
+		if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.JELLY_BEAN)
+		{
+			// Set the cached thumbnail
+			Bitmap bitmap = newsItem.getImage();
+			if (bitmap != null)
+			{
+				rv.setImageViewBitmap(R.id.image, bitmap);
+			}
+			else
+			{
+				rv.setImageViewBitmap(R.id.image, null);
+			}			
+		}
+		else if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.ICE_CREAM_SANDWICH)
+		{
+//			String imgUrlStr = newsItem.getImageUrl();
+//			
+//			if (imgUrlStr != null)
+//			{
+//				rv.setViewVisibility(R.id.image, View.VISIBLE);
+//				newsItem = cacheImgDisk(newsItem);
+//				
+//				String imgFileName = newsItem.getImgFileName();
+//				Log.d(TAG, "imgFileName = " + imgFileName);
+//				if (imgFileName != null)
+//				{
+//					File f = new File(directory, imgFileName);
+//					Uri uriFromFile = Uri.fromFile(f);
+//					rv.setUri(R.id.image, "setImageURI", uriFromFile);
+//				}
+//				else
+//				{
+//					rv.setUri(R.id.image, "setImageURI", null);
+//				}			
+//			}
+//			else
+//			{
+//				rv.setViewVisibility(R.id.image, View.GONE);
+//			}			
+		}
+	}
+
 	public int getViewTypeCount()
 	{
 		return 1;
@@ -201,7 +210,9 @@ class DealsRemoteViewsFactory implements RemoteViewsService.RemoteViewsFactory
 	 */
 	public void onDataSetChanged()
 	{
+		List<NewsItem> tmplist = new ArrayList<NewsItem>();
 		
+
 		Log.d(TAG, "onDataSetChanged(): Retriving RSS News Items");
 		// if offline,
 		// Open a connection to the local database
@@ -219,8 +230,8 @@ class DealsRemoteViewsFactory implements RemoteViewsService.RemoteViewsFactory
 		// Clear collection, clear list
 		// Update timestamp
 
-		list.clear();
 		
+		boolean isDataAvailable = true;
 		String footerMsg = "Last Updated: " + DealsService.sdfFull.format(new Date())
 				+ DealsWidgetProvider.suffix.get(widgetId);
 
@@ -241,7 +252,7 @@ class DealsRemoteViewsFactory implements RemoteViewsService.RemoteViewsFactory
 			for (RssItem rssItem : rssItems)
 			{
 				NewsItem ni = new NewsItem(rssItem);
-				list.add(ni);
+				tmplist.add(ni);
 			}
 
 		}
@@ -249,16 +260,19 @@ class DealsRemoteViewsFactory implements RemoteViewsService.RemoteViewsFactory
 		{
 			e.printStackTrace();
 			footerMsg = "RSS Feed URL Invalid (" + e.getClass().getName() + ")";
+			isDataAvailable = false;
 		}
 		catch (SAXException e)
 		{
 			e.printStackTrace();
 			footerMsg = "Cannot parse RSS Feed (" + e.getClass().getName() + ")";
+			isDataAvailable = false;
 		}
 		catch (IOException e)
 		{
 			e.printStackTrace();
 			footerMsg = "Check Network Connection (" + e.getClass().getName() + ")";
+			isDataAvailable = false;
 		}
 		
 
@@ -276,11 +290,76 @@ class DealsRemoteViewsFactory implements RemoteViewsService.RemoteViewsFactory
 		 * // Display results list.clear(); list.addAll(tmplist);
 		 */
 		
+		if (isDataAvailable)
+		{
+			Log.d(TAG, "Data is available, clearing list");
+			list.clear();
+			list.addAll(tmplist);
+		}
+		
 		Log.d(TAG, footerMsg);
 		updateFooter(footerMsg);
 		
+		
+		
 	}
 	
+	/**
+	 * Take the URL out of the NewsItem, download the img, store it as a local
+	 * file; Remember the file handler at the in the newsitem
+	 * 
+	 * @param ni
+	 * @return
+	 */
+	private NewsItem cacheImgDisk(NewsItem ni)
+	{
+		String urlStr = ni.getImageUrl();
+
+		if (ni.getImgFileName() == null && urlStr != null)
+		{
+			FileOutputStream fos = null;
+			HttpURLConnection connection;
+			Bitmap bmp = null;
+			try
+			{
+				URL url = new URL(urlStr);
+
+				connection = (HttpURLConnection) url.openConnection();
+				connection.setDoInput(true);
+				connection.connect();
+				InputStream input = connection.getInputStream();
+								
+				bmp = BitmapFactory.decodeStream(input);
+				bmp.copy(Bitmap.Config.ARGB_4444, false);
+				bmp = Bitmap.createScaledBitmap(bmp, 200, 200, false);
+				String filename = ni.getImgFileName(); //getLastBitFromUrl(urlStr);
+				fos = context.openFileOutput(filename, Context.MODE_WORLD_READABLE);
+				bmp.compress(Bitmap.CompressFormat.JPEG, 10, fos);
+
+				ni.setImgFileName(filename);
+			}
+			catch (Exception e)
+			{
+				e.printStackTrace();
+			}
+			finally
+			{
+				try
+				{
+					fos.close();
+					bmp = null;
+				}
+				catch (IOException e)
+				{
+					e.printStackTrace();
+				}
+			}
+		}
+		return ni;
+	}				
+		
+	
+
 	private void updateFooter(String msg)
 	{
 		DealsWidgetProvider.sendPendingIntent(
@@ -301,6 +380,11 @@ class DealsRemoteViewsFactory implements RemoteViewsService.RemoteViewsFactory
 		list.clear();
 	}
 	
+	// http://stackoverflow.com/questions/4050087/how-to-obtain-the-last-path-segment-of-an-uri
+	public static String getLastBitFromUrl(final String url)
+	{
+	    return url.replaceFirst(".*/([^/?]+).*", "$1");
+	}	
 
 
 }

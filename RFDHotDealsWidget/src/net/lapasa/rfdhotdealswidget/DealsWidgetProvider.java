@@ -7,6 +7,7 @@ import android.app.PendingIntent;
 import android.app.PendingIntent.CanceledException;
 import android.appwidget.AppWidgetManager;
 import android.appwidget.AppWidgetProvider;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -88,7 +89,6 @@ public class DealsWidgetProvider extends AppWidgetProvider
 		{
 			String msg = intent.getStringExtra(METADATA);
 			Log.d(TAG, "msg = " + msg);
-			Log.d(TAG, Boolean.toString(context == null));
 			updateStatusFooterOnly(context, widgetId, msg);
 		}
 
@@ -206,7 +206,10 @@ public class DealsWidgetProvider extends AppWidgetProvider
 	@Override
 	public void onUpdate(Context context, AppWidgetManager appWidgetManager, int[] appWidgetIds)
 	{
-		Log.d(TAG, "onUpdate("+Arrays.toString(appWidgetIds)+")");
+		ComponentName THIS_WIDGET = new ComponentName(context, DealsWidgetProvider.class);
+		int[] widgetIds = appWidgetManager.getAppWidgetIds(THIS_WIDGET);
+
+		Log.d(TAG, "onUpdate("+Arrays.toString(widgetIds)+")");
 		
 		// update each of the widgets with the remote adapter
 		for (int i = 0; i < appWidgetIds.length; i++)
@@ -241,10 +244,26 @@ public class DealsWidgetProvider extends AppWidgetProvider
 
 			// Configure intent to launch SETTINGS Activity
 			Intent configIntent = new Intent(context, ConfigurationActivity.class);
+			boolean additionalWidgetFlag = widgetIds.length > 1; 
+			configIntent.putExtra(ConfigurationActivity.IS_ADDITIONAL_WIDGET, additionalWidgetFlag);
 			configIntent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, widgetId);
 			configIntent.setData(Uri.parse(configIntent.toUri(Intent.URI_INTENT_SCHEME)));
 			PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, configIntent, PendingIntent.FLAG_CANCEL_CURRENT);
 			rv.setOnClickPendingIntent(R.id.settings, pendingIntent);
+			
+			if (widgetIds.length > 1)
+			{
+				try
+				{
+					pendingIntent.send();
+				}
+				catch (CanceledException e)
+				{
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+
 			
 			// Configure intent to refresh widget manually
 			Intent refreshBtnIntent= new Intent(context, DealsWidgetProvider.class);
@@ -268,6 +287,8 @@ public class DealsWidgetProvider extends AppWidgetProvider
 			
 		}
 		super.onUpdate(context, appWidgetManager, appWidgetIds);
+		
+		
 	}
 
 	

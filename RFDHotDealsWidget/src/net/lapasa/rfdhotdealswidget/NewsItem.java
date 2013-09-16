@@ -13,6 +13,7 @@ import nl.matshofman.saxrssreader.RssItem;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.net.Uri;
 import android.text.format.DateUtils;
 import android.util.Log;
 
@@ -30,9 +31,11 @@ public class NewsItem
 	private static SimpleDateFormat sdfTime = new SimpleDateFormat("h:mm aa");
 	private Date date;
 	private Bitmap bitmap;
+	private String imgFileName;
 
 	public NewsItem(RssItem rssItem)
 	{
+		/*
 		if (rssItem == null)
 		{
 			this.rssItem = new RssItem();
@@ -45,13 +48,19 @@ public class NewsItem
 		{
 			this.rssItem = rssItem;	
 		}
+		*/
+		
+		this.rssItem = rssItem;
 		
 		date = this.rssItem.getPubDate();
 		Log.d(TAG, getTimeOnly());
 
 		if (getImageUrl() != null)
 		{
-			bitmap = loadBitmap(getImageUrl());
+			if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.JELLY_BEAN)
+			{
+				bitmap = loadBitmap(getImageUrl());	
+			}
 		}
 	}
 
@@ -70,6 +79,11 @@ public class NewsItem
 	public String getTimeOnly()
 	{
 		return sdfTime.format(date);
+	}
+	
+	public String getDateAsLong()
+	{
+		return String.valueOf(date.getTime());
 	}
 
 	public String getTitle()
@@ -108,9 +122,18 @@ public class NewsItem
 
 		return imgUrl;
 	}
-
-	public static Bitmap loadBitmap(String urlStr)
+	
+	
+	/**
+	 * Take the URL to an image, download the data to an internal directory
+	 * Persist the name associated the File object.
+	 * @param urlStr
+	 * @return
+	 */
+	public static Uri cacheBitmap(String urlStr)
 	{
+		Uri uri = null;
+		
 		try
 		{
 			URL url = new URL(urlStr);
@@ -119,8 +142,38 @@ public class NewsItem
 			connection.connect();
 			InputStream input = connection.getInputStream();
 			
+//			File file = conte
+//			OutputStream ouput = new FileOutputStream(file);
 			
 			Bitmap bmp = BitmapFactory.decodeStream(input);
+			if (bmp != null)
+			{
+				bmp = Bitmap.createScaledBitmap(bmp, 200, 200, true);			
+			}
+			
+			return null;
+		}
+		catch (IOException e)
+		{
+			e.printStackTrace();
+			return null;
+		}
+	}
+
+	public static Bitmap loadBitmap(String urlStr)
+	{
+		try
+		{
+			URL url = new URL(urlStr);
+			Log.d(TAG, "Loading bitmap from: " + urlStr);
+			HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+			connection.setDoInput(true);
+			connection.connect();
+			InputStream input = connection.getInputStream();
+			
+			
+			Bitmap bmp = BitmapFactory.decodeStream(input);
+			bmp.copy(Bitmap.Config.ARGB_4444, false);
 			if (bmp != null)
 			{
 				bmp = Bitmap.createScaledBitmap(bmp, 200, 200, true);			
@@ -132,6 +185,16 @@ public class NewsItem
 			e.printStackTrace();
 			return null;
 		}
+	}
+
+	public void setImgFileName(String filename)
+	{
+		this.imgFileName = filename;
+	}
+	
+	public String getImgFileName()
+	{
+		return this.imgFileName;
 	}
 
 }

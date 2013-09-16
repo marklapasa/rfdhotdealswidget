@@ -23,7 +23,9 @@ import android.util.Log;
 public class ConfigurationActivity extends Activity
 {
 	private static final String TAG = ConfigurationActivity.class.getName();
+	public static String IS_ADDITIONAL_WIDGET = "IS_ADDITIONAL_WIDGET";
 	private int widgetId;
+	private boolean isAdditionalWidget;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState)
@@ -38,6 +40,7 @@ public class ConfigurationActivity extends Activity
 		if (extras != null) 
 		{
 		    widgetId = extras.getInt(AppWidgetManager.EXTRA_APPWIDGET_ID, AppWidgetManager.INVALID_APPWIDGET_ID);
+		    isAdditionalWidget = extras.getBoolean(IS_ADDITIONAL_WIDGET);
 		}		
 		
 		setTitle("Settings");
@@ -46,6 +49,7 @@ public class ConfigurationActivity extends Activity
         FragmentManager mFragmentManager = getFragmentManager();
         FragmentTransaction mFragmentTransaction = mFragmentManager.beginTransaction();
         ConfigurationFragment f = new ConfigurationFragment();
+        
         f.setWidgetId(widgetId);
         mFragmentTransaction.replace(android.R.id.content, f);
         
