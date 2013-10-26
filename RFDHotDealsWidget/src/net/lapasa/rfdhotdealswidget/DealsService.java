@@ -28,7 +28,9 @@ public class DealsService extends RemoteViewsService
 	@Override
 	public RemoteViewsFactory onGetViewFactory(Intent intent)
 	{
-		DealsRemoteViewsFactory factory = new DealsRemoteViewsFactory(this.getApplicationContext(), intent);		
+		DealsRemoteViewsFactory factory 
+			= new DealsRemoteViewsFactory(this.getApplicationContext(), intent);
+		
 		return factory;
 	}
 }

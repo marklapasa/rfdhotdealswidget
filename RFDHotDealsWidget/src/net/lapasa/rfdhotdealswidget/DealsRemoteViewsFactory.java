@@ -1,10 +1,6 @@
 package net.lapasa.rfdhotdealswidget;
 
-import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
@@ -22,7 +18,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
@@ -43,17 +38,14 @@ class DealsRemoteViewsFactory implements RemoteViewsService.RemoteViewsFactory
 	private int widgetId;
 	private List<NewsItem> list = new ArrayList<NewsItem>();
 	private SharedPreferences prefs;
-	private File directory;
+	
 
 	public DealsRemoteViewsFactory(Context context, Intent intent)
 	{
 		this.context = context;
 		widgetId = intent.getIntExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, AppWidgetManager.INVALID_APPWIDGET_ID);
 		prefs = context.getSharedPreferences(DealsWidgetProvider.NAMESPACE + widgetId, Context.MODE_PRIVATE);
-		Log.d(TAG, "Created DealsRemoteViewsFactory for widgetId = " + widgetId);
-		
-		directory = context.getFilesDir();
-
+		Log.d(TAG, "Created DealsRemoteViewsFactory for widgetId = " + widgetId);		
 	}
 
 	/**
@@ -304,60 +296,6 @@ class DealsRemoteViewsFactory implements RemoteViewsService.RemoteViewsFactory
 		
 	}
 	
-	/**
-	 * Take the URL out of the NewsItem, download the img, store it as a local
-	 * file; Remember the file handler at the in the newsitem
-	 * 
-	 * @param ni
-	 * @return
-	 */
-	private NewsItem cacheImgDisk(NewsItem ni)
-	{
-		String urlStr = ni.getImageUrl();
-
-		if (ni.getImgFileName() == null && urlStr != null)
-		{
-			FileOutputStream fos = null;
-			HttpURLConnection connection;
-			Bitmap bmp = null;
-			try
-			{
-				URL url = new URL(urlStr);
-
-				connection = (HttpURLConnection) url.openConnection();
-				connection.setDoInput(true);
-				connection.connect();
-				InputStream input = connection.getInputStream();
-								
-				bmp = BitmapFactory.decodeStream(input);
-				bmp.copy(Bitmap.Config.ARGB_4444, false);
-				bmp = Bitmap.createScaledBitmap(bmp, 200, 200, false);
-				String filename = ni.getImgFileName(); //getLastBitFromUrl(urlStr);
-				fos = context.openFileOutput(filename, Context.MODE_WORLD_READABLE);
-				bmp.compress(Bitmap.CompressFormat.JPEG, 10, fos);
-
-				ni.setImgFileName(filename);
-			}
-			catch (Exception e)
-			{
-				e.printStackTrace();
-			}
-			finally
-			{
-				try
-				{
-					fos.close();
-					bmp = null;
-				}
-				catch (IOException e)
-				{
-					e.printStackTrace();
-				}
-			}
-		}
-		return ni;
-	}				
-		
 	
 
 	private void updateFooter(String msg)
