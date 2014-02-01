@@ -5,45 +5,51 @@
     android:layout_height="match_parent"
     android:orientation="vertical" >
 
+    <!-- Hours Ago/Date Header -->
+
     <TextView
         android:id="@+id/date"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@drawable/widget_item_date_background"
         android:padding="3dp"
-        android:text="$Date"
         android:textColor="#FFFFFF"
         android:textSize="11dp" />
 
+    <!-- News Item Row -->
+
     <RelativeLayout
-        android:layout_width="fill_parent"
+        android:id="@+id/newsItemRow"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_below="@id/date"
-        android:background="@drawable/widget_item_title_background" >
+        android:background="@drawable/news_item_unread_background" >
 
         <ImageView
             android:id="@+id/image"
             android:layout_width="wrap_content"
-            android:layout_height="fill_parent"
-            android:paddingRight="3dp"
+            android:layout_height="match_parent"
             android:paddingBottom="3dp"
             android:paddingLeft="13dp"
-            android:paddingTop="3dp"
-             />
+            android:paddingRight="3dp"
+            android:paddingTop="3dp" />
 
         <!-- Title -->
+
         <TextView
             android:id="@+id/title"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_toRightOf="@id/image"
+            android:paddingLeft="13dp"
             android:paddingRight="13dp"
             android:paddingTop="3dp"
-            android:textColor="#FF000000"
+            android:textColor="#000000"
             android:textSize="11sp"
             android:textStyle="bold" />
 
-        <!-- Body -->
+        <!-- Body/NewsItem.getBody()/Description -->
+
         <TextView
             android:id="@+id/body"
             android:layout_width="match_parent"
@@ -51,12 +57,60 @@
             android:layout_below="@id/title"
             android:layout_toRightOf="@id/image"
             android:ellipsize="end"
-            android:maxLength="105"
-            android:maxLines="2"
+            android:maxLength="150"
+            android:maxLines="3"
             android:paddingBottom="3dp"
+            android:paddingLeft="13dp"
             android:paddingRight="15dp"
-            android:textColor="#FF000000"
+            android:textColor="#000000"
             android:textSize="11sp" />
+
+        <!-- New NewsItem Indicator -->
+
+        <RelativeLayout
+            android:id="@+id/newAndUnreadIndicator"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentTop="true"
+            android:layout_marginTop="3dp"
+            android:layout_toLeftOf="@id/title"
+            android:background="@drawable/widget_header_background"
+            android:visibility="gone" >
+
+            <TextView
+                android:id="@+id/newIndicatorTextView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingLeft="2dp"
+                android:paddingRight="2dp"
+                android:text="NEW!"
+                android:textColor="#ffffff"
+                android:textSize="6sp" />
+        </RelativeLayout>
+
+        <RelativeLayout
+            android:id="@+id/unreadIndicator"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentTop="true"
+            android:layout_marginTop="3dp"
+            android:layout_toLeftOf="@id/title"
+            android:background="@drawable/widget_item_unread_indicator"
+            android:visibility="gone" >
+
+            <TextView
+                android:id="@+id/unreadIndicatorTextView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingLeft="2dp"
+                android:paddingRight="2dp"
+                android:text="NEW!"
+                android:textColor="#ffffff"
+                android:textSize="6sp"
+                android:visibility="invisible" />
+        </RelativeLayout>
     </RelativeLayout>
 
 </RelativeLayout>

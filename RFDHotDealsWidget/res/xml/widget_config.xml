@@ -13,9 +13,8 @@
             android:data="market://details?id=net.lapasa.rfdhotdealswidget" />
     </PreferenceScreen>
 
-    <PreferenceCategory android:title="Widget Settings">
+    <PreferenceCategory android:title="Widget Settings" >
         <ListPreference
-            
             android:defaultValue="900000"
             android:dialogTitle="Select Refresh Frequency"
             android:entries="@array/entries_refresh_list_preference"
@@ -23,8 +22,16 @@
             android:key="@string/key_refresh_frequency"
             android:summary="@string/summary_refresh_frequency"
             android:title="Refresh Frequency" />
+        <ListPreference
+            android:defaultValue="604800000"
+            android:dialogTitle="Select Purge Threshold"
+            android:entries="@array/entries_purge_list_preference"
+            android:entryValues="@array/entryvalues_purge_list_preference"
+            android:key="@string/key_purge_threshold"
+            android:summary="@string/summary_purge_threshold"
+            android:title="Purge Cached Items Threshold" />
 
-        <EditTextPreference            
+        <EditTextPreference
             android:defaultValue="http://forums.redflagdeals.com/external.php?type=RSS2&amp;forumids=9"
             android:dialogTitle="Enter RSS Feed URL"
             android:key="@string/key_rssfeedurl"

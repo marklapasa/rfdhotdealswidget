@@ -14,7 +14,6 @@ import nl.matshofman.saxrssreader.RssItem;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.net.Uri;
 import android.text.format.DateUtils;
 import android.util.Log;
 
@@ -26,8 +25,11 @@ import android.util.Log;
  */
 public class NewsItem implements Comparable<NewsItem>
 {
-	public static long UNREAD = 1;
-	public static long READ = 0;
+	public static final long READ = 0;
+	public static final long UNREAD = 1;
+	public static final long NEW_AND_UNREAD = 2;
+	
+	
 	
 	private long id;
 	private static final String TAG = NewsItem.class.getName();
@@ -40,25 +42,28 @@ public class NewsItem implements Comparable<NewsItem>
 	private String title;
 	private String url;
 	private String body;
-	private long unreadFlag;
+	private long unreadFlag = -1;
+	private long longDate;
+	private long widgetId;
 	
-	public NewsItem()
+	public NewsItem(long widgetId)
 	{
-		this(null);
+		this(null, widgetId);
 	}	
 
-	public NewsItem(RssItem rssItem)
+	public NewsItem(RssItem rssItem, long widgetId)
 	{
 		this.rssItem = rssItem;
+		this.widgetId = widgetId;
 		
 		if (rssItem != null)
 		{
 			title = rssItem.getTitle();
 			url = rssItem.getLink();
-			date = rssItem.getPubDate();
+			setDate(rssItem.getPubDate().getTime());
 			body = parseBody(rssItem.getDescription());
 			unreadFlag = UNREAD;
-			Log.d(TAG, getTimeOnly());
+//			Log.d(TAG, getTimeOnly());
 	
 			if (getImageUrl() != null)
 			{
@@ -88,19 +93,14 @@ public class NewsItem implements Comparable<NewsItem>
 		return sdfTime.format(getDate());
 	}
 	
-	public long getDateAsLong()
-	{
-		return getDate().getTime();
-	}
-
 	public String getTitle()
 	{
 		return title;
 	}
 	
-	public String setBody(String body)
+	public void setBody(String body)
 	{
-		return body;
+		this.body = body;
 	}
 
 	public String getBody()
@@ -146,7 +146,7 @@ public class NewsItem implements Comparable<NewsItem>
 	 * Persist the name associated the File object.
 	 * @param urlStr
 	 * @return
-	 */
+	 
 	public static Uri cacheBitmap(String urlStr)
 	{
 		Uri uri = null;
@@ -165,7 +165,7 @@ public class NewsItem implements Comparable<NewsItem>
 			Bitmap bmp = BitmapFactory.decodeStream(input);
 			if (bmp != null)
 			{
-				bmp = Bitmap.createScaledBitmap(bmp, 200, 200, true);			
+				bmp = Bitmap.createScaledBitmap(bmp, 50, 50, true);			
 			}
 			
 			return null;
@@ -176,6 +176,7 @@ public class NewsItem implements Comparable<NewsItem>
 			return null;
 		}
 	}
+	*/
 
 	public static Bitmap loadBitmap(String urlStr)
 	{
@@ -216,6 +217,10 @@ public class NewsItem implements Comparable<NewsItem>
 	
 	public byte[] getImgAsByteArray()
 	{
+		if (bitmap == null)
+		{
+			return null;
+		}
 		ByteArrayOutputStream stream = new ByteArrayOutputStream();
 		bitmap.compress(Bitmap.CompressFormat.PNG, 100, stream);
 		return stream.toByteArray();
@@ -243,23 +248,31 @@ public class NewsItem implements Comparable<NewsItem>
 
 	public Date getDate()
 	{
-		return date;
+		return this.date;
 	}
 
 	public void setDate(long date)
 	{
 		this.date = new Date(date);
+		this.setLongDate(date);
 	}
 
 	public void setThumbnail(byte[] blob)
 	{
-		this.bitmap = BitmapFactory.decodeByteArray(blob, 0, blob.length);
+		if (blob != null)
+		{
+			this.bitmap = BitmapFactory.decodeByteArray(blob, 0, blob.length);
+		}
+		else
+		{
+			this.bitmap = null;
+		}
 	}
 
 	@Override
 	public int compareTo(NewsItem another)
 	{
-		return getDate().compareTo(another.getDate());
+		return another.getDate().compareTo(getDate());
 	}
 	
 	public void setUnreadFlag(long flag)
@@ -270,5 +283,30 @@ public class NewsItem implements Comparable<NewsItem>
 	public long getUnreadFlag()
 	{
 		return unreadFlag;
+	}
+
+	public long getLongDate()
+	{
+		return longDate;
+	}
+
+	public void setLongDate(long longDate)
+	{
+		this.longDate = longDate;
+	}
+
+	public long getWidgetId()
+	{
+		return widgetId;
+	}
+
+	public void setWidgetId(long widgetId)
+	{
+		this.widgetId = widgetId;
+	}
+	
+	public String toString(Context context)
+	{
+		return this.getTitle() + " | " + this.getFormattedDate(context);
 	}
 }

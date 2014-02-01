@@ -1,18 +1,15 @@
-package net.lapasa.rfdhotdealswidget;
+package net.lapasa.rfdhotdealswidget.services;
 
-import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import nl.matshofman.saxrssreader.RssFeed;
-import nl.matshofman.saxrssreader.RssItem;
-import nl.matshofman.saxrssreader.RssReader;
-
-import org.xml.sax.SAXException;
-
+import net.lapasa.rfdhotdealswidget.DealsWidgetProvider;
+import net.lapasa.rfdhotdealswidget.NewsItem;
+import net.lapasa.rfdhotdealswidget.R;
+import net.lapasa.rfdhotdealswidget.R.id;
+import net.lapasa.rfdhotdealswidget.R.layout;
+import net.lapasa.rfdhotdealswidget.model.NewsItemsDTO;
 import android.appwidget.AppWidgetManager;
 import android.content.Context;
 import android.content.Intent;
@@ -32,12 +29,13 @@ import android.widget.RemoteViewsService;
  */
 class DealsRemoteViewsFactory implements RemoteViewsService.RemoteViewsFactory
 {
-	private static final String RSS_HOT_DEALS = "http://forums.redflagdeals.com/external.php?type=RSS2&forumids=9";
+	
 	private static final String TAG = DealsRemoteViewsFactory.class.getName();
 	private Context context;
 	private int widgetId;
 	private List<NewsItem> list = new ArrayList<NewsItem>();
 	private SharedPreferences prefs;
+	private NewsItemsDTO dto;
 	
 
 	public DealsRemoteViewsFactory(Context context, Intent intent)
@@ -51,7 +49,10 @@ class DealsRemoteViewsFactory implements RemoteViewsService.RemoteViewsFactory
 	/**
 	 * Setup any connections/cursors to data source.
 	 */
-	public void onCreate(){}
+	public void onCreate()
+	{
+		dto = new NewsItemsDTO(context);
+	}
 
 	public int getCount()
 	{
@@ -65,38 +66,84 @@ class DealsRemoteViewsFactory implements RemoteViewsService.RemoteViewsFactory
 	}
 
 	/**
-	 * 
+	 * Returning null will get the default loading view
 	 */
 	@Override
 	public RemoteViews getLoadingView()
 	{
-		return null; // Returning null will get the default loading view
+		return null;
 	}
 
 	/**
-	 * 
+	 * Populate the data for each news item
 	 */
 	@Override
 	public RemoteViews getViewAt(int position)
 	{
+		// Data item
 		NewsItem newsItem = list.get(position);
 
+		// List row item layout
 		RemoteViews rv = new RemoteViews(context.getPackageName(), R.layout.news_item);
 		
-				 
-		setIconOnNewsItem(newsItem, rv);
+		// Change the new indicator tag on the upper right side
+		setIndicator(newsItem, rv);		
+		
+		setThumbnailOnNewsItem(newsItem, rv);
+		
+		// Set the first couple of lines of the news item description
+//		Log.w(TAG, "Body = " + newsItem.getBody());
+		rv.setTextViewText(R.id.body, newsItem.getBody());
+		
 		 
 		// Set the title
 		rv.setTextViewText(R.id.title, newsItem.getTitle());
 		
-		// Set the first couple of lines of the news item description
-		rv.setTextViewText(R.id.body, newsItem.getBody());
 
 		// Set the date
 		String dateStrCurrent = newsItem.getFormattedDate(context);
 		rv.setTextViewText(R.id.date, dateStrCurrent);
 
 		// Create illusion of grouping by time
+		groupByTime(position, rv, dateStrCurrent);
+
+
+		// Configure Selected Item in a Fill-Intent //		
+		setOnItemClickHandler(newsItem, rv);
+
+		// Return the remote views object.
+		return rv;
+	}
+
+	private void setIndicator(NewsItem newsItem, RemoteViews rv)
+	{		
+		long unreadFlag = newsItem.getUnreadFlag();
+		if (unreadFlag == NewsItem.NEW_AND_UNREAD)
+		{
+			rv.setViewVisibility(R.id.newAndUnreadIndicator, View.VISIBLE);
+			rv.setViewVisibility(R.id.unreadIndicator, View.GONE);
+		}
+		else if (unreadFlag == NewsItem.UNREAD)
+		{
+			rv.setViewVisibility(R.id.newAndUnreadIndicator, View.GONE);
+			rv.setViewVisibility(R.id.unreadIndicator, View.VISIBLE);
+		}
+		else
+		{
+			rv.setViewVisibility(R.id.newAndUnreadIndicator, View.GONE);
+			rv.setViewVisibility(R.id.unreadIndicator, View.GONE);			
+		}
+	}
+
+	/**
+	 * Create illusion of grouping by time
+	 * 
+	 * @param position
+	 * @param rv
+	 * @param dateStrCurrent
+	 */
+	private void groupByTime(int position, RemoteViews rv, String dateStrCurrent)
+	{
 		if (position > 0)
 		{
 			NewsItem prevNewsItem = list.get(position - 1);
@@ -115,29 +162,32 @@ class DealsRemoteViewsFactory implements RemoteViewsService.RemoteViewsFactory
 		{
 			rv.setViewVisibility(R.id.date, View.VISIBLE);	
 		}
+	}
 
-		// Next, we set a fill-intent which will be used to fill-in the pending
-		// intent template which is set on the collection view in
-		// StackWidgetProvider.
-
-		// ////////////////////////////////////////////
-		// Configure Selected Item in a Fill-Intent //
-		// ////////////////////////////////////////////
+	/**
+	 * Next, we set a fill-intent which will be used to fill-in the pending
+	 * intent template which is set on the collection view in StackWidgetProvider.
+	 * 
+	 * @param newsItem
+	 * @param rv
+	 */
+	private void setOnItemClickHandler(NewsItem newsItem, RemoteViews rv)
+	{
 		Bundle extras = new Bundle();
 
 		// Assign the current position associated to this view
 		extras.putString(DealsWidgetProvider.SELECTED_URL, newsItem.getUrl());
+		extras.putLong(DealsWidgetProvider.NEWS_ITEM_ID, newsItem.getId());
 		extras.putInt(AppWidgetManager.EXTRA_APPWIDGET_ID, widgetId);
+		
 		Intent fillInIntent = new Intent();
-		fillInIntent.putExtras(extras);
+		fillInIntent.putExtras(extras); 
 		fillInIntent.setData(Uri.parse(fillInIntent.toUri(Intent.URI_INTENT_SCHEME)));
+		
 		rv.setOnClickFillInIntent(R.id.newsItem, fillInIntent);
-
-		// Return the remote views object.
-		return rv;
 	}
 
-	private void setIconOnNewsItem(NewsItem newsItem, RemoteViews rv)
+	private void setThumbnailOnNewsItem(NewsItem newsItem, RemoteViews rv)
 	{
 		if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.JELLY_BEAN)
 		{
@@ -146,10 +196,12 @@ class DealsRemoteViewsFactory implements RemoteViewsService.RemoteViewsFactory
 			if (bitmap != null)
 			{
 				rv.setImageViewBitmap(R.id.image, bitmap);
+				rv.setViewVisibility(R.id.image, View.VISIBLE);
 			}
 			else
 			{
 				rv.setImageViewBitmap(R.id.image, null);
+				rv.setViewVisibility(R.id.image, View.GONE);
 			}			
 		}
 		else if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.ICE_CREAM_SANDWICH)
@@ -190,113 +242,54 @@ class DealsRemoteViewsFactory implements RemoteViewsService.RemoteViewsFactory
 	{
 		return true;
 	}
-
-	/**
-	 * Triggered when you call AppWidgetManager notifyAppWidgetViewDataChanged
-	 * 
-	 * This allows a RemoteViewsFactory to respond to data changes by updating
-	 * any internal references. Note: expensive tasks can be safely performed
-	 * synchronously within this method.
-	 * 
-	 * In the interim, the old data will be displayed within the widget.
-	 */
+	
 	public void onDataSetChanged()
 	{
-		List<NewsItem> tmplist = new ArrayList<NewsItem>();
+		Log.d(TAG, "onDataSetChanged()...");
 		
-
-		Log.d(TAG, "onDataSetChanged(): Retriving RSS News Items");
-		// if offline,
-		// Open a connection to the local database
-		// Query for all persisted news items and store it into a collection
-		// Get
-
-		// else if online
-		// Open a connection to the RSS feed
-		// Download the RSS Feed
-		// Parse the RSS feed into a NewsItem[]
-		// Delete all items in database
-		// Persist results:List<NewsItem> into database
-
-		// If data is retrived either live online or from local database
-		// Clear collection, clear list
-		// Update timestamp
-
 		
-		boolean isDataAvailable = true;
-		String footerMsg = "Last Updated: " + DealsService.sdfFull.format(new Date())
-				+ DealsWidgetProvider.suffix.get(widgetId);
-
-		URL url;
-		try
-		{
-			url = getUrl();
-
-			RssFeed feed = RssReader.read(url);
-			
-			/*
-			Editor editor = prefs.edit();
-			editor.putString(context.getString(R.string.key_edittext_bigtitle), feed.getTitle());
-			editor.commit();
-			*/
-
-			ArrayList<RssItem> rssItems = feed.getRssItems();
-			for (RssItem rssItem : rssItems)
-			{
-				NewsItem ni = new NewsItem(rssItem);
-				tmplist.add(ni);
-			}
-
-		}
-		catch (MalformedURLException e)
-		{
-			e.printStackTrace();
-			footerMsg = "RSS Feed URL Invalid (" + e.getClass().getName() + ")";
-			isDataAvailable = false;
-		}
-		catch (SAXException e)
-		{
-			e.printStackTrace();
-			footerMsg = "Cannot parse RSS Feed (" + e.getClass().getName() + ")";
-			isDataAvailable = false;
-		}
-		catch (IOException e)
-		{
-			e.printStackTrace();
-			footerMsg = "Check Network Connection (" + e.getClass().getName() + ")";
-			isDataAvailable = false;
-		}
+		deleteStaleNewsItems();
 		
-
-		/*
-		 * 
-		 * TODO:
-		 * List<NewsItem> tmplist = new ArrayList<NewsItem>();
-		 * 
-		 * // Check online status
-		 * 
-		 * // If offline, read from DB // parse results
-		 * 
-		 * // If online, query RSS // parse results // store results in DB
-		 * 
-		 * // Display results list.clear(); list.addAll(tmplist);
-		 */
 		
-		if (isDataAvailable)
+		// Query for all cached news items that have the targetWidgetId
+		List<NewsItem> newsItems = dto.getAll(widgetId);
+		if (newsItems.size() > 0)
 		{
-			Log.d(TAG, "Data is available, clearing list");
+			Log.i(TAG, "onDataSetChanged(): Persisted data is available, clearing list");
 			list.clear();
-			list.addAll(tmplist);
+			list.addAll(newsItems);
+		}
+		else
+		{
+			Log.i(TAG, "onDataSetChanged(): No data has been persited; no need to clear list");
 		}
 		
-		Log.d(TAG, footerMsg);
-		updateFooter(footerMsg);
 		
+		/*
+		Log.i(TAG, "Here are the " + list.size() + " items that will be displayed to the user:");
 		
-		
+		for (int i = 0; i < list.size() - 1; i++)
+		{
+			NewsItem tmp = list.get(i);
+			Log.d(TAG, list.get(i).getTitle());
+		}
+		*/
 	}
 	
 	
+	/**
+	 * Initiate call to remove older items
+	 */
+	private void deleteStaleNewsItems()
+	{
+		String key = context.getString(R.string.key_purge_threshold);
+		String thresholdStr = prefs.getString(key, "604800000"); // 1 Week Default
+		long threshold = Long.parseLong(thresholdStr);
+		if (threshold > 0)
+		{
+			dto.removeStale(widgetId, threshold);
+		}
+	}
 
 	private void updateFooter(String msg)
 	{
@@ -306,11 +299,6 @@ class DealsRemoteViewsFactory implements RemoteViewsService.RemoteViewsFactory
 				widgetId, msg);		
 	}
 
-	private URL getUrl() throws MalformedURLException
-	{
-		String url = prefs.getString(context.getString(R.string.key_rssfeedurl), RSS_HOT_DEALS);		
-		return new URL(url);
-	}
 
 	@Override
 	public void onDestroy()

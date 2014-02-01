@@ -7,6 +7,7 @@
     <string name="big_text_default">Hot Deals</string>
     <string name="key_edittext_bigtitle">edittext_bigtitle</string>
     <string name="key_refresh_frequency">key_refresh_frequency</string>
+    <string name="key_purge_threshold">key_purge_threshold</string>
     <string name="key_rssfeedurl">key_rssfeedurl</string>
     <string name="please_wait_">Please Wait...</string>
     <string name="hot_deals">Hot Deals</string>
@@ -17,5 +18,5 @@
     <string name="summary_small_title">Edit the small title other than the default one</string>
     <string name="summary_big_title">Edit the big title other than the default one</string>
     <string name="summary_refresh_frequency">Choose how often the RSS Feed will be automatically polled</string>
-
+    <string name="summary_purge_threshold">Set rule of how long an item can remain saved in your local database</string>
 </resources>

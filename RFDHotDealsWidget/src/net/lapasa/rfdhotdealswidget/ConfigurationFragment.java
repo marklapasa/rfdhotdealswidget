@@ -47,7 +47,7 @@ public class ConfigurationFragment extends PreferenceFragment implements OnShare
 		Intent sendIntent = new Intent();
 		sendIntent.setAction(android.content.Intent.ACTION_SEND);
 		sendIntent.putExtra(Intent.EXTRA_TEXT,
-				"Using the RFD Hot Deals widget on my Android device(s), I am able to get the latest deals on my homescreen!\n\nhttps://play.google.com/store/apps/details?id=net.lapasa.vocaltweet");
+				"Using the RFD Hot Deals widget on my Android device(s), I am able to get the latest deals on my homescreen!\n\nhttps://play.google.com/store/apps/details?id=net.lapasa.rfdhotdealswidget");
 		sendIntent.setType("text/plain");
 		sendIntent.putExtra(Intent.EXTRA_SUBJECT, "RFD Hot Deals Widget For Android");
 		sendIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET);
@@ -95,6 +95,7 @@ public class ConfigurationFragment extends PreferenceFragment implements OnShare
 	@Override
 	public void onSharedPreferenceChanged(SharedPreferences prefs, String key)
 	{
+		
 		/*
 		String value = prefs.getString(key, null);
 		Preference targetPref = getPreferenceScreen().findPreference(key);

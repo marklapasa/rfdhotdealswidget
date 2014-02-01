@@ -1,12 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- android:configure="net.lapasa.rfdhotdealswidget.ConfigurationActivity" 
-android:widgetCategory="home_screen"-->
-<appwidget-provider xmlns:android="http://schemas.android.com/apk/res/android"
-    android:autoAdvanceViewId="@id/newsfeed"   
+<appwidget-provider 
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:autoAdvanceViewId="@id/newsfeed"
     android:initialLayout="@layout/widget_layout"
-    android:minHeight="320dp"
-    android:minWidth="240dp"
+    android:minHeight="150dp"
+    android:minWidth="150dp"
     android:previewImage="@drawable/preview"
     android:resizeMode="horizontal|vertical"
-    android:updatePeriodMillis="3600000"
-    />
+    android:widgetCategory="home_screen"
+    android:updatePeriodMillis="3600000" />
+<!--     android:configure="net.lapasa.rfdhotdealswidget.MainActivity" -->
+<!--     android:configure="net.lapasa.rfdhotdealswidget.ConfigurationActivity"
+ -->

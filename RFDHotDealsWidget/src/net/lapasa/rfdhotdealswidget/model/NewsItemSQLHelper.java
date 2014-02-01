@@ -2,6 +2,7 @@ package net.lapasa.rfdhotdealswidget.model;
 
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteStatement;
 import android.database.sqlite.SQLiteDatabase.CursorFactory;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
@@ -13,7 +14,7 @@ public class NewsItemSQLHelper extends SQLiteOpenHelper
 
 	private static final int DATABASE_VERSION = 1;
 
-	public static final String TABLE_NEWSITEMS = "newsItems";
+	public static final String TABLE_NEWS_ITEMS = "newsItems";
 
 	public static final String ID = "_id";
 
@@ -28,9 +29,22 @@ public class NewsItemSQLHelper extends SQLiteOpenHelper
 	public static final String IS_UNREAD = "isUnread";
 
 	public static final String THUMBNAIL = "thumbnail";
+	
+	public static final String WIDGET_ID = "widgetId";
 
-	private static final String DATABASE_CREATE = "create table " + TABLE_NEWSITEMS + "(" + ID + " integer primary key autoincrement, " + TITLE + " text," + LINK + " text," + PUB_DATE + " long,"
-			+ DESCRIPTION + " text," + IS_UNREAD + " long, " + THUMBNAIL + " blob" + ");";
+	private static final String DATABASE_CREATE = 
+			"create table " 
+					+ TABLE_NEWS_ITEMS 
+					+ "(" 
+						+ ID + " integer primary key autoincrement, " 
+						+ TITLE + " text," 
+						+ LINK + " text," 
+						+ PUB_DATE + " long,"
+						+ DESCRIPTION + " text," 
+						+ IS_UNREAD + " long, " 
+						+ THUMBNAIL + " blob,"
+						+ WIDGET_ID + " long"
+					+ ");";
 
 	public NewsItemSQLHelper(Context context)
 	{
@@ -47,7 +61,7 @@ public class NewsItemSQLHelper extends SQLiteOpenHelper
 	public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion)
 	{
 		Log.w(NewsItemSQLHelper.class.getName(), "Upgrading database from version " + oldVersion + " to " + newVersion + ", which will destroy all old data");
-		db.execSQL("DROP TABLE IF EXISTS " + TABLE_NEWSITEMS);
+		db.execSQL("DROP TABLE IF EXISTS " + TABLE_NEWS_ITEMS);
 		onCreate(db);
 	}
 
@@ -61,8 +75,25 @@ public class NewsItemSQLHelper extends SQLiteOpenHelper
 			PUB_DATE, 
 			DESCRIPTION, 
 			IS_UNREAD, 
-			THUMBNAIL 
+			THUMBNAIL,
+			WIDGET_ID
 		};
+	}
+	
+	public static SQLiteStatement getInsertSQL(SQLiteDatabase database)
+	{
+		String sql = "INSERT INTO " + NewsItemSQLHelper.TABLE_NEWS_ITEMS + 
+				"(" + 
+				NewsItemSQLHelper.TITLE + "," + 
+				NewsItemSQLHelper.LINK + "," + 
+				NewsItemSQLHelper.PUB_DATE + "," + 
+				NewsItemSQLHelper.DESCRIPTION + "," +
+				NewsItemSQLHelper.IS_UNREAD + "," +
+				NewsItemSQLHelper.THUMBNAIL + ", " +
+				NewsItemSQLHelper.WIDGET_ID + ")" + 
+				" VALUES(?,?,?,?,?,?,?)";
+		
+		return database.compileStatement(sql);
 	}
 
 }
