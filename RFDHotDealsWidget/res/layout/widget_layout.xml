@@ -11,20 +11,18 @@
         android:layout_height="wrap_content"
         android:background="@drawable/widget_header_background" >
 
-        
         <TextView
             android:id="@+id/smallText"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:paddingTop="6dp"
+            android:layout_marginBottom="-8dp"
             android:paddingBottom="0dp"
             android:paddingLeft="7dp"
+            android:paddingTop="6dp"
             android:text="@string/rfd"
-            android:layout_marginBottom="-8dp"
+            android:textColor="#FFFFFF"
             android:textSize="10sp"
-            android:textStyle="bold" 
-            android:textColor="#FFFFFF" />
-        
+            android:textStyle="bold" />
 
         <ImageButton
             android:id="@+id/settings"
@@ -37,7 +35,18 @@
             android:src="@drawable/ic_action_settings" />
 
         <ImageButton
-            android:id="@+id/refresh"
+            android:id="@+id/downloadBtn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:layout_toLeftOf="@id/settings"
+            android:background="@null"
+            android:paddingRight="3dp"
+            android:src="@drawable/ic_download"
+            android:visibility="gone" />
+
+        <ImageButton
+            android:id="@+id/refreshIndicator"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerVertical="true"
@@ -45,23 +54,22 @@
             android:background="@null"
             android:paddingRight="3dp"
             android:src="@drawable/ic_action_refresh" />
-        
+
         <TextView
             android:id="@+id/bigText"
-            android:maxLines="1"
-            android:ellipsize="marquee"
-            android:layout_below="@id/smallText"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:gravity="left"
             android:layout_alignParentLeft="true"
-            android:layout_toLeftOf="@id/refresh"
-            android:paddingLeft="5dp"
+            android:layout_below="@id/smallText"
+            android:layout_toLeftOf="@id/refreshIndicator"
+            android:ellipsize="marquee"
+            android:gravity="left"
+            android:maxLines="1"
             android:paddingBottom="4dp"
+            android:paddingLeft="5dp"
             android:text="@string/hot_deals"
             android:textAppearance="?android:attr/textAppearanceLarge"
             android:textColor="#FFFFFF" />
-        
     </RelativeLayout>
 
     <FrameLayout
@@ -78,13 +86,13 @@
         android:layout_alignParentBottom="true"
         android:background="@drawable/widget_header_background"
         android:gravity="right"
+        android:maxLines="1"
         android:paddingLeft="6dp"
         android:paddingRight="6dp"
+        android:singleLine="true"
         android:text="@string/please_wait_"
         android:textColor="#FFFFFF"
-        android:textSize="10sp" 
-        android:maxLines="1"
-        android:singleLine="true"/>
+        android:textSize="10sp" />
 
     <FrameLayout
         android:id="@+id/footerShadow"

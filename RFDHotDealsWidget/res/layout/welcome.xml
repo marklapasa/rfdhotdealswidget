@@ -1,13 +1,27 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:orientation="vertical" >
+    android:layout_height="match_parent" >
 
-    <TextView
-        android:padding="20dp"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="RFD Hot Deals Widget is now ready for use! Look for it under widgets and drag it to your home screen!" />
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" 
+        android:orientation="vertical">
 
-</LinearLayout>
+        <TextView
+            android:id="@+id/welcomeTxt"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:padding="20dp"
+            android:text="@string/rfd_hot_deals_widget_is_now_ready_for_use_look_for_it_under_widgets_and_drag_it_to_your_home_screen_" />
+
+        <ImageView
+            android:id="@+id/installInstructions"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:contentDescription="@string/instructions_on_how_to_install"
+            android:layout_gravity="center_horizontal"
+            android:src="@drawable/instructions" />
+    </LinearLayout>
+
+</ScrollView>

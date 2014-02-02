@@ -71,9 +71,8 @@ public class DealsWidgetProvider extends AppWidgetProvider
 	/**
 	 * Whenever the user selects an item from the list, open the browser and
 	 * mark it as read
-	 * 
 	 */
-	// @Override
+	@Override
 	public void onReceive(Context context, Intent intent)
 	{
 		String action = intent.getAction();
@@ -122,6 +121,14 @@ public class DealsWidgetProvider extends AppWidgetProvider
 		super.onReceive(context, intent);
 	}
 
+	/**
+	 * Mark the news item as read because the user has touched the row on the list
+	 * then launch a browser window for the link associated to this news item
+	 * 
+	 * @param context
+	 * @param intent
+	 * @param widgetId
+	 */
 	private void handleOnListItemClicked(Context context, Intent intent, int widgetId)
 	{
 		// Update the db to reflect the user has opened this news item by
@@ -144,11 +151,13 @@ public class DealsWidgetProvider extends AppWidgetProvider
 		rv = new RemoteViews(context.getPackageName(), R.layout.widget_layout);
 		if (b)
 		{
-			rv.setViewVisibility(R.id.refresh, View.VISIBLE);
+			rv.setViewVisibility(R.id.refreshIndicator, View.GONE);
+			rv.setViewVisibility(R.id.downloadBtn, View.VISIBLE);			
 		}
 		else
 		{
-			rv.setViewVisibility(R.id.refresh, View.GONE);
+			rv.setViewVisibility(R.id.refreshIndicator, View.VISIBLE);
+			rv.setViewVisibility(R.id.downloadBtn, View.GONE);
 		}
 
 		AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(context);
@@ -367,7 +376,7 @@ public class DealsWidgetProvider extends AppWidgetProvider
 			refreshBtnIntent.setAction(DealsWidgetProvider.REFRESH_ACTION_MANUAL);
 			refreshBtnIntent.setData(Uri.parse(refreshBtnIntent.toUri(Intent.URI_INTENT_SCHEME)));
 			PendingIntent refreshIntent = PendingIntent.getBroadcast(context, 0, refreshBtnIntent, PendingIntent.FLAG_CANCEL_CURRENT);
-			rv.setOnClickPendingIntent(R.id.refresh, refreshIntent);
+			rv.setOnClickPendingIntent(R.id.downloadBtn, refreshIntent);
 
 			// Set Alarm to update this widget
 			setRepeatingRefreshAlarm(context, widgetId, DEFAULT_REFRESH_FREQUENCY);

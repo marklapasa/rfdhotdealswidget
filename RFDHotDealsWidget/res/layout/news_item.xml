@@ -61,7 +61,7 @@
             android:maxLines="3"
             android:paddingBottom="3dp"
             android:paddingLeft="13dp"
-            android:paddingRight="15dp"
+            android:paddingRight="16dp"
             android:textColor="#000000"
             android:textSize="11sp" />
 
@@ -69,35 +69,49 @@
 
         <RelativeLayout
             android:id="@+id/newAndUnreadIndicator"
-            android:layout_width="wrap_content"
+            android:layout_width="16dp"
             android:layout_height="wrap_content"
             android:layout_alignParentRight="true"
             android:layout_alignParentTop="true"
             android:layout_marginTop="3dp"
             android:layout_toLeftOf="@id/title"
-            android:background="@drawable/widget_header_background"
             android:visibility="gone" >
 
-            <TextView
-                android:id="@+id/newIndicatorTextView"
+            <RelativeLayout
+                android:id="@+id/newAndUnreadIndicatorINSIDE"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:paddingLeft="2dp"
-                android:paddingRight="2dp"
-                android:text="NEW!"
-                android:textColor="#ffffff"
-                android:textSize="6sp" />
+                android:background="@drawable/widget_header_background" >
+
+                <TextView
+                    android:id="@+id/newIndicatorTextView"
+                    android:layout_width="16dp"
+                    android:layout_height="wrap_content"
+                    android:paddingLeft="2dp"
+                    android:text="NEW!"
+                    android:textColor="#ffffff"
+                    android:textSize="6sp" />
+            </RelativeLayout>
+
+            <FrameLayout
+                android:id="@+id/indicatorShadow"
+                android:layout_width="16dp"
+                android:layout_height="2dp"
+                android:layout_alignLeft="@id/newAndUnreadIndicatorINSIDE"
+                android:layout_alignParentRight="@id/newAndUnreadIndicatorINSIDE"
+                android:layout_below="@id/newAndUnreadIndicatorINSIDE"
+                android:background="@drawable/indicator_shadow" />
         </RelativeLayout>
 
         <RelativeLayout
-            android:id="@+id/unreadIndicator"
+            android:id="@+id/readIndicator"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentRight="true"
             android:layout_alignParentTop="true"
             android:layout_marginTop="3dp"
             android:layout_toLeftOf="@id/title"
-            android:background="@drawable/widget_item_unread_indicator"
+            android:background="@drawable/widget_item_read_indicator"
             android:visibility="gone" >
 
             <TextView

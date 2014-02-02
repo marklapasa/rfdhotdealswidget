@@ -121,17 +121,17 @@ class DealsRemoteViewsFactory implements RemoteViewsService.RemoteViewsFactory
 		if (unreadFlag == NewsItem.NEW_AND_UNREAD)
 		{
 			rv.setViewVisibility(R.id.newAndUnreadIndicator, View.VISIBLE);
-			rv.setViewVisibility(R.id.unreadIndicator, View.GONE);
+			rv.setViewVisibility(R.id.readIndicator, View.GONE);
 		}
-		else if (unreadFlag == NewsItem.UNREAD)
+		else if (unreadFlag == NewsItem.READ)
 		{
 			rv.setViewVisibility(R.id.newAndUnreadIndicator, View.GONE);
-			rv.setViewVisibility(R.id.unreadIndicator, View.VISIBLE);
+			rv.setViewVisibility(R.id.readIndicator, View.VISIBLE);
 		}
 		else
 		{
 			rv.setViewVisibility(R.id.newAndUnreadIndicator, View.GONE);
-			rv.setViewVisibility(R.id.unreadIndicator, View.GONE);			
+			rv.setViewVisibility(R.id.readIndicator, View.GONE);			
 		}
 	}
 
