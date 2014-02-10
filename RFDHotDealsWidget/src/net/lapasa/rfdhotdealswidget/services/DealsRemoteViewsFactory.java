@@ -99,12 +99,25 @@ class DealsRemoteViewsFactory implements RemoteViewsService.RemoteViewsFactory
 		NewsItem newsItem = list.get(position);
 
 		// List row item layout
-		RemoteViews rv = new RemoteViews(context.getPackageName(), R.layout.news_item);
+		int sdkVer = android.os.Build.VERSION.SDK_INT;
+		int targetLayoutId;
+		if (sdkVer == 14 || sdkVer >= 19)
+		{
+			targetLayoutId = R.layout.news_item_no_thumbnail;
+		}
+		else
+		{
+			targetLayoutId = R.layout.news_item;
+		}
+		RemoteViews rv = new RemoteViews(context.getPackageName(), targetLayoutId);
 		
 		// Change the new indicator tag on the upper right side
 		setIndicator(newsItem, rv);		
 		
-		setThumbnailOnNewsItem(newsItem.getThumbnail(), rv);
+		if (targetLayoutId == R.layout.news_item)
+		{
+			setThumbnailOnNewsItem(newsItem.getThumbnail(), rv);
+		}
 		
 		// Set the first couple of lines of the news item description
 		rv.setTextViewText(R.id.body, newsItem.getBody());
@@ -203,44 +216,27 @@ class DealsRemoteViewsFactory implements RemoteViewsService.RemoteViewsFactory
 
 	private void setThumbnailOnNewsItem(String thumbnailUrl, RemoteViews rv)
 	{
-		/*
-		 * This is both terrible and temporary. KitKat will not allow retrieving of
-		 * bitmap for a RemoteView unless it comes from a content provider.
-		 * 
-		 * The picasso image caching library currently does not use this.
-		 */
-		if (android.os.Build.VERSION.SDK_INT <= 18)
+		if (thumbnailUrl != null)
 		{
-			if (thumbnailUrl != null)
+			Bitmap bitmap;
+			try
 			{
-				Bitmap bitmap;
-				try
-				{
-					// TODO: This 200, 200 stuff needs to put into dimens file
-					bitmap = Picasso.with(context).load(thumbnailUrl).resize(200, 200).centerInside().get();
-					rv.setImageViewBitmap(R.id.image, bitmap);
-					rv.setViewVisibility(R.id.image, View.VISIBLE);
-				}
-				catch (IOException e)
-				{
-					rv.setImageViewBitmap(R.id.image, null);
-					rv.setViewVisibility(R.id.image, View.GONE);
-				}
+				// TODO: This 200, 200 stuff needs to put into dimens file
+				bitmap = Picasso.with(context).load(thumbnailUrl).resize(200, 200).centerInside().get();
+				rv.setImageViewBitmap(R.id.image, bitmap);
+				rv.setViewVisibility(R.id.image, View.VISIBLE);
 			}
-			else
+			catch (IOException e)
 			{
 				rv.setImageViewBitmap(R.id.image, null);
-				rv.setViewVisibility(R.id.image, View.GONE);			
-			}	
+				rv.setViewVisibility(R.id.image, View.GONE);
+			}
 		}
 		else
 		{
 			rv.setImageViewBitmap(R.id.image, null);
 			rv.setViewVisibility(R.id.image, View.GONE);			
 		}
-		
-		
-			
 	}
 
 	public int getViewTypeCount()
