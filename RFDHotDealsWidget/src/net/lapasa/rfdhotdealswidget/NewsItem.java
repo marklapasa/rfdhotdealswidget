@@ -15,11 +15,6 @@
  ******************************************************************************/
 package net.lapasa.rfdhotdealswidget;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.HttpURLConnection;
-import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.regex.Matcher;
@@ -27,10 +22,7 @@ import java.util.regex.Pattern;
 
 import nl.matshofman.saxrssreader.RssItem;
 import android.content.Context;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.text.format.DateUtils;
-import android.util.Log;
 
 /**
  * A wrapper for RssItem
@@ -52,14 +44,13 @@ public class NewsItem implements Comparable<NewsItem>
 	private static SimpleDateFormat sdfDate = new SimpleDateFormat("MMM d");
 	private static SimpleDateFormat sdfTime = new SimpleDateFormat("h:mm aa");
 	private Date date;
-	private Bitmap bitmap;
-	private String imgFileName;
 	private String title;
 	private String url;
 	private String body;
 	private long unreadFlag = -1;
 	private long longDate;
 	private long widgetId;
+	private String thumbnailUrl;
 	
 	public NewsItem(long widgetId)
 	{
@@ -78,14 +69,10 @@ public class NewsItem implements Comparable<NewsItem>
 			setDate(rssItem.getPubDate().getTime());
 			body = parseBody(rssItem.getDescription());
 			unreadFlag = UNREAD;
-//			Log.d(TAG, getTimeOnly());
-	
-			if (getImageUrl() != null)
+			String imgUrlStr = extractImgUrlStr();
+			if (imgUrlStr != null)
 			{
-				if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.JELLY_BEAN)
-				{
-					bitmap = loadBitmap(getImageUrl());	
-				}
+				setThumbnail(imgUrlStr);
 			}
 		}
 	}
@@ -136,12 +123,9 @@ public class NewsItem implements Comparable<NewsItem>
 		return url;
 	}
 
-	public Bitmap getImage()
-	{
-		return bitmap;
-	}
+	
 
-	public String getImageUrl()
+	public String extractImgUrlStr()
 	{
 		String imgUrl = null;
 		Pattern p = Pattern.compile("(http://)+[\\d\\w[-./]]*(.jpg)+");
@@ -156,91 +140,9 @@ public class NewsItem implements Comparable<NewsItem>
 	}
 	
 	
-	/**
-	 * Take the URL to an image, download the data to an internal directory
-	 * Persist the name associated the File object.
-	 * @param urlStr
-	 * @return
-	 
-	public static Uri cacheBitmap(String urlStr)
-	{
-		Uri uri = null;
-		
-		try
-		{
-			URL url = new URL(urlStr);
-			HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-			connection.setDoInput(true);
-			connection.connect();
-			InputStream input = connection.getInputStream();
-			
-//			File file = conte
-//			OutputStream ouput = new FileOutputStream(file);
-			
-			Bitmap bmp = BitmapFactory.decodeStream(input);
-			if (bmp != null)
-			{
-				bmp = Bitmap.createScaledBitmap(bmp, 50, 50, true);			
-			}
-			
-			return null;
-		}
-		catch (IOException e)
-		{
-			e.printStackTrace();
-			return null;
-		}
-	}
-	*/
 
-	public static Bitmap loadBitmap(String urlStr)
-	{
-		try
-		{
-			URL url = new URL(urlStr);
-			Log.d(TAG, "Loading bitmap from: " + urlStr);
-			HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-			connection.setDoInput(true);
-			connection.connect();
-			InputStream input = connection.getInputStream();
-			
-			
-			Bitmap bmp = BitmapFactory.decodeStream(input);
-			bmp.copy(Bitmap.Config.ARGB_4444, false);
-			if (bmp != null)
-			{
-				bmp = Bitmap.createScaledBitmap(bmp, 200, 200, true);			
-			}
-			return bmp;
-		}
-		catch (IOException e)
-		{
-			e.printStackTrace();
-			return null;
-		}
-	}
 
-	public void setImgFileName(String filename)
-	{
-		this.imgFileName = filename;
-	}
 	
-	public String getImgFileName()
-	{
-		return this.imgFileName;
-	}
-	
-	public byte[] getImgAsByteArray()
-	{
-		if (bitmap == null)
-		{
-			return null;
-		}
-		ByteArrayOutputStream stream = new ByteArrayOutputStream();
-		bitmap.compress(Bitmap.CompressFormat.PNG, 100, stream);
-		return stream.toByteArray();
-	}
-
 	public long getId()
 	{
 		return id;
@@ -272,16 +174,14 @@ public class NewsItem implements Comparable<NewsItem>
 		this.setLongDate(date);
 	}
 
-	public void setThumbnail(byte[] blob)
+	public void setThumbnail(String urlStr)
 	{
-		if (blob != null)
-		{
-			this.bitmap = BitmapFactory.decodeByteArray(blob, 0, blob.length);
-		}
-		else
-		{
-			this.bitmap = null;
-		}
+		this.thumbnailUrl = urlStr;
+	}
+	
+	public String getThumbnail()
+	{
+		return thumbnailUrl;
 	}
 
 	@Override

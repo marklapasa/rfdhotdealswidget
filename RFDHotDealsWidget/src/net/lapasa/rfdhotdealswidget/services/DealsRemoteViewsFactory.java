@@ -15,15 +15,13 @@
  ******************************************************************************/
 package net.lapasa.rfdhotdealswidget.services;
 
+import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 import net.lapasa.rfdhotdealswidget.DealsWidgetProvider;
 import net.lapasa.rfdhotdealswidget.NewsItem;
 import net.lapasa.rfdhotdealswidget.R;
-import net.lapasa.rfdhotdealswidget.R.id;
-import net.lapasa.rfdhotdealswidget.R.layout;
 import net.lapasa.rfdhotdealswidget.model.NewsItemsDTO;
 import android.appwidget.AppWidgetManager;
 import android.content.Context;
@@ -36,6 +34,8 @@ import android.util.Log;
 import android.view.View;
 import android.widget.RemoteViews;
 import android.widget.RemoteViewsService;
+
+import com.squareup.picasso.Picasso;
 
 /**
  * 
@@ -104,10 +104,9 @@ class DealsRemoteViewsFactory implements RemoteViewsService.RemoteViewsFactory
 		// Change the new indicator tag on the upper right side
 		setIndicator(newsItem, rv);		
 		
-		setThumbnailOnNewsItem(newsItem, rv);
+		setThumbnailOnNewsItem(newsItem.getThumbnail(), rv);
 		
 		// Set the first couple of lines of the news item description
-//		Log.w(TAG, "Body = " + newsItem.getBody());
 		rv.setTextViewText(R.id.body, newsItem.getBody());
 		
 		 
@@ -202,50 +201,46 @@ class DealsRemoteViewsFactory implements RemoteViewsService.RemoteViewsFactory
 		rv.setOnClickFillInIntent(R.id.newsItem, fillInIntent);
 	}
 
-	private void setThumbnailOnNewsItem(NewsItem newsItem, RemoteViews rv)
+	private void setThumbnailOnNewsItem(String thumbnailUrl, RemoteViews rv)
 	{
-		if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.JELLY_BEAN)
+		/*
+		 * This is both terrible and temporary. KitKat will not allow retrieving of
+		 * bitmap for a RemoteView unless it comes from a content provider.
+		 * 
+		 * The picasso image caching library currently does not use this.
+		 */
+		if (android.os.Build.VERSION.SDK_INT <= 18)
 		{
-			// Set the cached thumbnail
-			Bitmap bitmap = newsItem.getImage();
-			if (bitmap != null)
+			if (thumbnailUrl != null)
 			{
-				rv.setImageViewBitmap(R.id.image, bitmap);
-				rv.setViewVisibility(R.id.image, View.VISIBLE);
+				Bitmap bitmap;
+				try
+				{
+					// TODO: This 200, 200 stuff needs to put into dimens file
+					bitmap = Picasso.with(context).load(thumbnailUrl).resize(200, 200).centerInside().get();
+					rv.setImageViewBitmap(R.id.image, bitmap);
+					rv.setViewVisibility(R.id.image, View.VISIBLE);
+				}
+				catch (IOException e)
+				{
+					rv.setImageViewBitmap(R.id.image, null);
+					rv.setViewVisibility(R.id.image, View.GONE);
+				}
 			}
 			else
 			{
 				rv.setImageViewBitmap(R.id.image, null);
-				rv.setViewVisibility(R.id.image, View.GONE);
-			}			
+				rv.setViewVisibility(R.id.image, View.GONE);			
+			}	
 		}
-		else if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.ICE_CREAM_SANDWICH)
+		else
 		{
-//			String imgUrlStr = newsItem.getImageUrl();
-//			
-//			if (imgUrlStr != null)
-//			{
-//				rv.setViewVisibility(R.id.image, View.VISIBLE);
-//				newsItem = cacheImgDisk(newsItem);
-//				
-//				String imgFileName = newsItem.getImgFileName();
-//				Log.d(TAG, "imgFileName = " + imgFileName);
-//				if (imgFileName != null)
-//				{
-//					File f = new File(directory, imgFileName);
-//					Uri uriFromFile = Uri.fromFile(f);
-//					rv.setUri(R.id.image, "setImageURI", uriFromFile);
-//				}
-//				else
-//				{
-//					rv.setUri(R.id.image, "setImageURI", null);
-//				}			
-//			}
-//			else
-//			{
-//				rv.setViewVisibility(R.id.image, View.GONE);
-//			}			
+			rv.setImageViewBitmap(R.id.image, null);
+			rv.setViewVisibility(R.id.image, View.GONE);			
 		}
+		
+		
+			
 	}
 
 	public int getViewTypeCount()

@@ -75,29 +75,29 @@ public class NewsItemsDTO
 	/**
 	 * Inject the fields of the newsItem object into the SQLiteStatement 
 	 * 
-	 * @param insertStatment
+	 * @param insertStatement
 	 * @param newsItem
 	 * @return
 	 */
-	private long persistNewsItem(SQLiteStatement insertStatment, NewsItem newsItem)
+	private long persistNewsItem(SQLiteStatement insertStatement, NewsItem newsItem)
 	{		
-		insertStatment.clearBindings();
-		insertStatment.bindString(1, newsItem.getTitle());
-		insertStatment.bindString(2, newsItem.getUrl());
-		insertStatment.bindLong(3, newsItem.getLongDate());
-		insertStatment.bindString(4, newsItem.getBody());
-		insertStatment.bindLong(5, newsItem.getUnreadFlag());
-		if (newsItem.getImgAsByteArray() != null)
+		insertStatement.clearBindings();
+		insertStatement.bindString(1, newsItem.getTitle());
+		insertStatement.bindString(2, newsItem.getUrl());
+		insertStatement.bindLong(3, newsItem.getLongDate());
+		insertStatement.bindString(4, newsItem.getBody());
+		insertStatement.bindLong(5, newsItem.getUnreadFlag());
+		if (newsItem.getThumbnail() != null)
 		{
-			insertStatment.bindBlob(6, newsItem.getImgAsByteArray());
+			insertStatement.bindString(6, newsItem.getThumbnail());
 		}
 		else
 		{
-			insertStatment.bindNull(6);
+			insertStatement.bindNull(6);
 		}
-		insertStatment.bindLong(7, newsItem.getWidgetId());
+		insertStatement.bindLong(7, newsItem.getWidgetId());
 		
-		return insertStatment.executeInsert();
+		return insertStatement.executeInsert();
 	}
 
 	private Cursor getCursorById(long id)
@@ -123,7 +123,7 @@ public class NewsItemsDTO
 		Log.i(TAG, "Body == " + body);
 		newsItem.setBody(body);
 		newsItem.setUnreadFlag(cursor.getLong(5));
-		newsItem.setThumbnail(cursor.getBlob(6));
+		newsItem.setThumbnail(cursor.getString(6));
 		
 		return newsItem;
 	}
@@ -191,9 +191,9 @@ public class NewsItemsDTO
 		updateStatment.bindLong(3, longDate);
 		updateStatment.bindString(4, newsItem.getBody());
 		updateStatment.bindLong(5, newsItem.getUnreadFlag());
-		if (newsItem.getImgAsByteArray() != null)
+		if (newsItem.getThumbnail() != null)
 		{
-			updateStatment.bindBlob(6, newsItem.getImgAsByteArray());
+			updateStatment.bindString(6, newsItem.getThumbnail());
 		}
 		else
 		{

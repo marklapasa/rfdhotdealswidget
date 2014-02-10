@@ -57,7 +57,7 @@ public class NewsItemSQLHelper extends SQLiteOpenHelper
 						+ PUB_DATE + " long,"
 						+ DESCRIPTION + " text," 
 						+ IS_UNREAD + " long, " 
-						+ THUMBNAIL + " blob,"
+						+ THUMBNAIL + " text,"
 						+ WIDGET_ID + " long"
 					+ ");";
 
