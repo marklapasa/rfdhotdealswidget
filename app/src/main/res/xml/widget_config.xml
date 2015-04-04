@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Copyright 2014 Mark Lapasa
+  
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+  
+    http://www.apache.org/licenses/LICENSE-2.0
+  
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android" >
+
+    <PreferenceScreen
+        android:summary="Let other RFD Users know about this widget via Email, Facebook, Twitter, Google+ ..."
+        android:title="Share This Widget" >
+    </PreferenceScreen>
+    <PreferenceScreen
+        android:summary="If you enjoy using this widget, please take a moment to rate it. Thanks for your support!"
+        android:title="Rate This Widget" >
+        <intent
+            android:action="android.intent.action.VIEW"
+            android:data="market://details?id=net.lapasa.rfdhotdealswidget" />
+    </PreferenceScreen>
+
+    <PreferenceCategory android:title="Widget Settings" >
+        <ListPreference
+            android:defaultValue="900000"
+            android:dialogTitle="Select Refresh Frequency"
+            android:entries="@array/entries_refresh_list_preference"
+            android:entryValues="@array/entryvalues_refresh_list_preference"
+            android:key="@string/key_refresh_frequency"
+            android:summary="@string/summary_refresh_frequency"
+            android:title="Refresh Frequency" />
+        <ListPreference
+            android:defaultValue="604800000"
+            android:dialogTitle="Select Purge Threshold"
+            android:entries="@array/entries_purge_list_preference"
+            android:entryValues="@array/entryvalues_purge_list_preference"
+            android:key="@string/key_purge_threshold"
+            android:summary="@string/summary_purge_threshold"
+            android:title="Purge Cached Items Threshold" />
+
+        <EditTextPreference
+            android:defaultValue="http://forums.redflagdeals.com/external.php?type=RSS2&amp;forumids=9"
+            android:dialogTitle="Enter RSS Feed URL"
+            android:key="@string/key_rssfeedurl"
+            android:summary="@string/summary_rss_feed_url"
+            android:title="RSS Feed URL" />
+        <EditTextPreference
+            android:defaultValue="@string/small_text_default"
+            android:dialogTitle="Enter Small Title"
+            android:key="@string/key_edittext_smalltitle"
+            android:summary="@string/summary_small_title"
+            android:title="@string/customize_small_title" />
+        <EditTextPreference
+            android:defaultValue="@string/big_text_default"
+            android:dialogTitle="Enter Big Title"
+            android:key="@string/key_edittext_bigtitle"
+            android:summary="@string/summary_big_title"
+            android:title="@string/customize_big_title" />
+    </PreferenceCategory>
+
+</PreferenceScreen>
