@@ -6,6 +6,14 @@ Use this widget to get a list of the latest hot deals on RedFlagDeals. It's open
 v3.00
 - Migrated to Android Studio
 
+TODO
+
+- Reintroduce thumbnails
+- Configure notifications
+- View notifications 
+- UI Update
+
+
 v2.03
 - Added support for non-thumbnail version for Ice Cream Sandwhich and KitKat devices.
 
