@@ -44,21 +44,21 @@ import com.squareup.picasso.Picasso;
  */
 class DealsRemoteViewsFactory implements RemoteViewsService.RemoteViewsFactory
 {
-	
+
 	private static final String TAG = DealsRemoteViewsFactory.class.getName();
 	private Context context;
 	private int widgetId;
 	private List<NewsItem> list = new ArrayList<NewsItem>();
 	private SharedPreferences prefs;
 	private NewsItemsDTO dto;
-	
+
 
 	public DealsRemoteViewsFactory(Context context, Intent intent)
 	{
 		this.context = context;
 		widgetId = intent.getIntExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, AppWidgetManager.INVALID_APPWIDGET_ID);
 		prefs = context.getSharedPreferences(DealsWidgetProvider.NAMESPACE + widgetId, Context.MODE_PRIVATE);
-		Log.d(TAG, "Created DealsRemoteViewsFactory for widgetId = " + widgetId);		
+		Log.d(TAG, "Created DealsRemoteViewsFactory for widgetId = " + widgetId);
 	}
 
 	/**
@@ -100,32 +100,32 @@ class DealsRemoteViewsFactory implements RemoteViewsService.RemoteViewsFactory
 
 		// List row item layout
 		int sdkVer = android.os.Build.VERSION.SDK_INT;
-		int targetLayoutId;
+		int targetLayoutId = R.layout.news_item
 		if (sdkVer == 14 || sdkVer >= 19)
 		{
 			targetLayoutId = R.layout.news_item_no_thumbnail;
 		}
 		else
 		{
-			targetLayoutId = R.layout.news_item;
+
 		}
 		RemoteViews rv = new RemoteViews(context.getPackageName(), targetLayoutId);
-		
+
 		// Change the new indicator tag on the upper right side
-		setIndicator(newsItem, rv);		
-		
+		setIndicator(newsItem, rv);
+
 		if (targetLayoutId == R.layout.news_item)
 		{
 			setThumbnailOnNewsItem(newsItem.getThumbnail(), rv);
 		}
-		
+
 		// Set the first couple of lines of the news item description
 		rv.setTextViewText(R.id.body, newsItem.getBody());
-		
-		 
+
+
 		// Set the title
 		rv.setTextViewText(R.id.title, newsItem.getTitle());
-		
+
 
 		// Set the date
 		String dateStrCurrent = newsItem.getFormattedDate(context);
@@ -135,7 +135,7 @@ class DealsRemoteViewsFactory implements RemoteViewsService.RemoteViewsFactory
 		groupByTime(position, rv, dateStrCurrent);
 
 
-		// Configure Selected Item in a Fill-Intent //		
+		// Configure Selected Item in a Fill-Intent //
 		setOnItemClickHandler(newsItem, rv);
 
 		// Return the remote views object.
@@ -143,7 +143,7 @@ class DealsRemoteViewsFactory implements RemoteViewsService.RemoteViewsFactory
 	}
 
 	private void setIndicator(NewsItem newsItem, RemoteViews rv)
-	{		
+	{
 		long unreadFlag = newsItem.getUnreadFlag();
 		if (unreadFlag == NewsItem.NEW_AND_UNREAD)
 		{
@@ -158,13 +158,13 @@ class DealsRemoteViewsFactory implements RemoteViewsService.RemoteViewsFactory
 		else
 		{
 			rv.setViewVisibility(R.id.newAndUnreadIndicator, View.GONE);
-			rv.setViewVisibility(R.id.readIndicator, View.GONE);			
+			rv.setViewVisibility(R.id.readIndicator, View.GONE);
 		}
 	}
 
 	/**
 	 * Create illusion of grouping by time
-	 * 
+	 *
 	 * @param position
 	 * @param rv
 	 * @param dateStrCurrent
@@ -187,14 +187,14 @@ class DealsRemoteViewsFactory implements RemoteViewsService.RemoteViewsFactory
 		}
 		else
 		{
-			rv.setViewVisibility(R.id.date, View.VISIBLE);	
+			rv.setViewVisibility(R.id.date, View.VISIBLE);
 		}
 	}
 
 	/**
 	 * Next, we set a fill-intent which will be used to fill-in the pending
 	 * intent template which is set on the collection view in StackWidgetProvider.
-	 * 
+	 *
 	 * @param newsItem
 	 * @param rv
 	 */
@@ -206,15 +206,22 @@ class DealsRemoteViewsFactory implements RemoteViewsService.RemoteViewsFactory
 		extras.putString(DealsWidgetProvider.SELECTED_URL, newsItem.getUrl());
 		extras.putLong(DealsWidgetProvider.NEWS_ITEM_ID, newsItem.getId());
 		extras.putInt(AppWidgetManager.EXTRA_APPWIDGET_ID, widgetId);
-		
+
 		Intent fillInIntent = new Intent();
-		fillInIntent.putExtras(extras); 
+		fillInIntent.putExtras(extras);
 		fillInIntent.setData(Uri.parse(fillInIntent.toUri(Intent.URI_INTENT_SCHEME)));
-		
+
 		rv.setOnClickFillInIntent(R.id.newsItem, fillInIntent);
 	}
 
-	private void setThumbnailOnNewsItem(String thumbnailUrl, RemoteViews rv)
+    private void setThumbnailOnNewsItem(String thumbnailUrl, RemoteViews rv)
+    {
+        Picasso.with(context).load(thumbnailUrl).into(rv, R.id.image, new int[] {widgetId});
+
+
+    }
+
+	private void setThumbnailOnNewsItemOLD(String thumbnailUrl, RemoteViews rv)
 	{
 		if (thumbnailUrl != null)
 		{
