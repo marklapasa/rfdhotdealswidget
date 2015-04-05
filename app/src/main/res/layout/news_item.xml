@@ -48,7 +48,8 @@
             android:paddingLeft="13dp"
             android:paddingRight="3dp"
             android:paddingTop="3dp"
-            android:layout_centerVertical="true"/>
+            android:layout_centerVertical="true"
+            android:visibility="gone"/>
 
         <!-- Title -->
 
