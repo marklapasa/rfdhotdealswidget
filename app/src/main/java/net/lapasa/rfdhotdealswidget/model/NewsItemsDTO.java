@@ -23,7 +23,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import net.lapasa.rfdhotdealswidget.NewsItem;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.SQLException;

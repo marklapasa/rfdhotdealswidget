@@ -13,7 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ******************************************************************************/
-package net.lapasa.rfdhotdealswidget;
+package net.lapasa.rfdhotdealswidget.model;
+
+import android.content.Context;
+import android.text.format.DateUtils;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -21,8 +24,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import nl.matshofman.saxrssreader.RssItem;
-import android.content.Context;
-import android.text.format.DateUtils;
 
 /**
  * A wrapper for RssItem

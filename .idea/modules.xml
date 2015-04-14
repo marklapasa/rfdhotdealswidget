@@ -2,9 +2,10 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/RFDHotDealsWidget.iml" filepath="$PROJECT_DIR$/RFDHotDealsWidget.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
+      <module fileurl="file://$PROJECT_DIR$/rfdhotdealswidget.iml" filepath="$PROJECT_DIR$/rfdhotdealswidget.iml" />
+      <module fileurl="file://$PROJECT_DIR$/rfdhotdealswidget.iml" filepath="$PROJECT_DIR$/rfdhotdealswidget.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../sugar/library/sugar.iml" filepath="$PROJECT_DIR$/../sugar/library/sugar.iml" />
     </modules>
   </component>
 </project>
-

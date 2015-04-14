@@ -23,7 +23,7 @@ import java.util.Date;
 import java.util.List;
 
 import net.lapasa.rfdhotdealswidget.DealsWidgetProvider;
-import net.lapasa.rfdhotdealswidget.NewsItem;
+import net.lapasa.rfdhotdealswidget.model.NewsItem;
 import net.lapasa.rfdhotdealswidget.R;
 import net.lapasa.rfdhotdealswidget.model.NewsItemsDTO;
 import nl.matshofman.saxrssreader.RssFeed;

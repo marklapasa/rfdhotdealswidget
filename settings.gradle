@@ -1,1 +1,3 @@
 include ':app'
+include ':sugar'
+project(':sugar').projectDir = new File("C:\\androidstudio2015\\sugar\\library");

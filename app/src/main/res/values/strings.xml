@@ -36,4 +36,10 @@
     <string name="summary_purge_threshold">Set rule of how long an item can remain saved in your local database</string>
     <string name="rfd_hot_deals_widget_is_now_ready_for_use_look_for_it_under_widgets_and_drag_it_to_your_home_screen_">Widget is now ready for use! Look for it under widgets and drag it to your home screen!</string>
     <string name="instructions_on_how_to_install">Instructions on how to install</string>
+    <string name="title_activity_deal_watch">Deal Watch</string>
+    <string name="hello_world">Hello world!</string>
+    <string name="action_settings">Settings</string>
+    <string name="create_filter">Create Filter</string>
+    <string name="edit_filter">Edit Filter</string>
+    <string name="deal_watch">Deal Watch</string>
 </resources>

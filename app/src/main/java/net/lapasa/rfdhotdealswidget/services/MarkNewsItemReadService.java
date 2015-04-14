@@ -16,7 +16,7 @@
 package net.lapasa.rfdhotdealswidget.services;
 
 import net.lapasa.rfdhotdealswidget.DealsWidgetProvider;
-import net.lapasa.rfdhotdealswidget.NewsItem;
+import net.lapasa.rfdhotdealswidget.model.NewsItem;
 import net.lapasa.rfdhotdealswidget.model.NewsItemsDTO;
 import android.app.IntentService;
 import android.appwidget.AppWidgetManager;
