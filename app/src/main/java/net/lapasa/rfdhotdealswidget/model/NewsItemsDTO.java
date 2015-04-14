@@ -172,7 +172,7 @@ public class NewsItemsDTO
         close();
     }
 
-    public NewsItem update(NewsItem newsItem)
+    public void update(NewsItem newsItem)
     {
         open();
 
@@ -204,22 +204,9 @@ public class NewsItemsDTO
         }
         updateStatment.bindLong(7, newsItem.getWidgetId());
 
-        long id = updateStatment.executeUpdateDelete();
+        updateStatment.executeUpdateDelete();
 
-        Cursor cursor = getCursorById(id);
-
-        if (cursor != null && cursor.moveToFirst())
-        {
-            NewsItem updatedNewsItem = cursorToNewsItem(cursor);
-            cursor.close();
-            close();
-            return updatedNewsItem;
-        }
-        else
-        {
-            close();
-            return newsItem;
-        }
+        close();
     }
 
 
