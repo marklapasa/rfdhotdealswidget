@@ -15,14 +15,6 @@
  ******************************************************************************/
 package net.lapasa.rfdhotdealswidget.services;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-
-import net.lapasa.rfdhotdealswidget.DealsWidgetProvider;
-import net.lapasa.rfdhotdealswidget.model.NewsItem;
-import net.lapasa.rfdhotdealswidget.R;
-import net.lapasa.rfdhotdealswidget.model.NewsItemsDTO;
 import android.appwidget.AppWidgetManager;
 import android.content.Context;
 import android.content.Intent;
@@ -37,6 +29,16 @@ import android.widget.RemoteViewsService;
 
 import com.squareup.picasso.Picasso;
 
+import net.lapasa.rfdhotdealswidget.DealsWidgetProvider;
+import net.lapasa.rfdhotdealswidget.R;
+import net.lapasa.rfdhotdealswidget.Utils;
+import net.lapasa.rfdhotdealswidget.model.NewsItem;
+import net.lapasa.rfdhotdealswidget.model.NewsItemsDTO;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  *
  * @author mlapasa
@@ -44,7 +46,7 @@ import com.squareup.picasso.Picasso;
  */
 class DealsRemoteViewsFactory implements RemoteViewsService.RemoteViewsFactory
 {
-
+	private int targetLayoutId = Utils.getNewsItemLayout();
 	private static final String TAG = DealsRemoteViewsFactory.class.getName();
 	private Context context;
 	private int widgetId;
@@ -99,16 +101,6 @@ class DealsRemoteViewsFactory implements RemoteViewsService.RemoteViewsFactory
 		NewsItem newsItem = list.get(position);
 
 		// List row item layout
-		int sdkVer = android.os.Build.VERSION.SDK_INT;
-		int targetLayoutId;
-		if (sdkVer == 14 || sdkVer >= 19)
-		{
-			targetLayoutId = R.layout.news_item_no_thumbnail;
-		}
-		else
-		{
-			targetLayoutId = R.layout.news_item;
-		}
 		RemoteViews rv = new RemoteViews(context.getPackageName(), targetLayoutId);
 
 		// Change the new indicator tag on the upper right side
@@ -258,7 +250,7 @@ class DealsRemoteViewsFactory implements RemoteViewsService.RemoteViewsFactory
 
 
 		// Query for all cached news items that have the targetWidgetId
-		List<NewsItem> newsItems = dto.getAll(widgetId);
+		List<NewsItem> newsItems = dto.getAllByWidgetId(widgetId);
 		if (newsItems.size() > 0)
 		{
 			Log.i(TAG, "onDataSetChanged(): Persisted data is available, clearing list");

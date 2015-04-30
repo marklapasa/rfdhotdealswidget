@@ -15,20 +15,18 @@
  ******************************************************************************/
 package net.lapasa.rfdhotdealswidget.model;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
 import android.content.Context;
 import android.database.Cursor;
 import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteStatement;
 import android.util.Log;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Date;
+import java.util.List;
 
 public class NewsItemsDTO
 {
@@ -105,6 +103,7 @@ public class NewsItemsDTO
 				NewsItemSQLHelper.TABLE_NEWS_ITEMS,
 				NewsItemSQLHelper.getAllColumns(),
 				NewsItemSQLHelper.ID + " = " + id, null, null, null, null);
+		boolean b = cursor.moveToNext();
 		return cursor;
 	}
 
@@ -132,32 +131,33 @@ public class NewsItemsDTO
 	 * @param widgetId
 	 * @return
 	 */
-	public List<NewsItem> getAll(long widgetId)
+	public List<NewsItem> getAllByWidgetId(long widgetId)
 	{
-		Log.d(TAG, "getAll(" + widgetId + "): Trying to retrieve news items from DB ");
-		open();
-		
+		Log.d(TAG, "getAllByWidgetId(" + widgetId + "): Trying to retrieve news items from DB ");
+		return find(NewsItemSQLHelper.WIDGET_ID + " = " + widgetId);
+	}
+
+	public List<NewsItem> find(String queryStr)
+	{
 		List<NewsItem> newsItems = new ArrayList<NewsItem>();
-		
-		Cursor cursor = database.query(
-				NewsItemSQLHelper.TABLE_NEWS_ITEMS,
-				NewsItemSQLHelper.getAllColumns(),
-				NewsItemSQLHelper.WIDGET_ID + " = " + widgetId, null, null, null, NewsItemSQLHelper.PUB_DATE + " ASC");
-	
+		open();
+
+		Cursor cursor = database.query(NewsItemSQLHelper.TABLE_NEWS_ITEMS, NewsItemSQLHelper.getAllColumns(), queryStr, null, null, null, NewsItemSQLHelper.PUB_DATE + " ASC");
+
 		cursor.moveToFirst();
-		
+
 		while(!cursor.isAfterLast())
 		{
 			NewsItem newsItem = cursorToNewsItem(cursor);
 			newsItems.add(newsItem);
 			cursor.moveToNext();
 		}
-		
-		cursor.close();		
+
+		cursor.close();
 		close();
-		
+
 		Collections.sort(newsItems);
-		
+
 		return newsItems;
 	}
 	
@@ -295,7 +295,7 @@ public class NewsItemsDTO
 	private List<NewsItem> removeDuplicates(List<NewsItem> newNewsItems, int widgetId)
 	{
 		int originalSize = newNewsItems.size();
-		List<NewsItem> persistedItems = getAll(widgetId);
+		List<NewsItem> persistedItems = getAllByWidgetId(widgetId);
 		
 		
 		
@@ -371,94 +371,13 @@ public class NewsItemsDTO
 		return idsList;
 	}
 
-	/**
-	 * Exclude NewsItem that have already been persisted, based on 
-	 * publication date (pubDate)
-	 * 
-	 * @param newNewsItems
-	 * @return
-	 */
-	private List<NewsItem> removeDuplicatesOLD(List<NewsItem> newNewsItems, int widgetId)
-	{
-		int originalSize = newNewsItems.size();
-	
-		open();		
-				
-		// Query for a list of cached news items by titles for target WidgetId
-		Cursor cursor = database.query(
-				NewsItemSQLHelper.TABLE_NEWS_ITEMS,
-				new String[]
-						{ 
-							NewsItemSQLHelper.TITLE,
-							NewsItemSQLHelper.WIDGET_ID
-						},
-				NewsItemSQLHelper.WIDGET_ID + " = " + widgetId, null, null, null, null);
-		
-		cursor.moveToFirst();
-		
-		// Store titles into the set
-		Set<String> persistedTitles = new HashSet<String>();
-		while(!cursor.isAfterLast())
-		{
-			persistedTitles.add(cursor.getString(0));
-			Log.w(TAG, "PERSISTED==> " + cursor.getLong(1) + ":" + cursor.getString(0));
-			cursor.moveToNext();
-		}
-		
-		
-		
-		cursor.close();		
-		close();
-				
-		// Using the persisted title, cross reference them 
-		// with the downloaded news items
-		
-		
-		if (persistedTitles.size() > 0)
-		{
-			NewsItem newNewsItem;
-			
-			for (int i = originalSize - 1; i >= 0; i--)
-			{
-				newNewsItem = newNewsItems.get(i);
-				String rawTitle = newNewsItem.getTitle();
-				
-				
-				String pTitleRemove = null;
-				
-				for (String pTitle : persistedTitles)
-				{
-					if (pTitle.equals(rawTitle))
-					{
-						pTitleRemove = pTitle;
-						Log.e(TAG, "REMOVE->" + newNewsItem.toString(context));
-						newNewsItems.remove(i);
-						break;
-					}
-				}
-				
-				if (pTitleRemove != null)
-				{
-					persistedTitles.remove(pTitleRemove);
-				}
-			}
-			
-			Log.d(TAG, "There were " + (originalSize - newNewsItems.size()) + " removed from RSS Response");			
-		}
-		else
-		{
-			Log.d(TAG, "No duplicates, these news items are unique");
-		}
-		
-		return newNewsItems;
-	}
 
 	/**
 	 * Open conenction with DB to remove news items for target widget that are older
 	 * than target threshold
 	 * 
 	 * @param widgetId
-	 * @param threadhold	1d/2d/5d/1w/2w/1m
+	 * @param threshold	1d/2d/5d/1w/2w/1m
 	 */
 	public void removeStale(int widgetId, long threshold)
 	{
@@ -477,8 +396,6 @@ public class NewsItemsDTO
 		close();
 		
 		Log.d(TAG, "removeStale(widgetId = " +widgetId + ", threshold=" + threshold + "): " + rowsDeleted + " items were deleted from the DB");
-		
-		
 	}
     
 }

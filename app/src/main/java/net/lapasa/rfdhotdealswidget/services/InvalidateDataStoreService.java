@@ -15,23 +15,6 @@
  ******************************************************************************/
 package net.lapasa.rfdhotdealswidget.services;
 
-import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-
-import net.lapasa.rfdhotdealswidget.DealsWidgetProvider;
-import net.lapasa.rfdhotdealswidget.model.NewsItem;
-import net.lapasa.rfdhotdealswidget.R;
-import net.lapasa.rfdhotdealswidget.model.NewsItemsDTO;
-import nl.matshofman.saxrssreader.RssFeed;
-import nl.matshofman.saxrssreader.RssItem;
-import nl.matshofman.saxrssreader.RssReader;
-
-import org.xml.sax.SAXException;
-
 import android.app.IntentService;
 import android.app.Service;
 import android.appwidget.AppWidgetManager;
@@ -45,6 +28,24 @@ import android.util.Log;
 
 import com.androidbook.salbcr.LightedGreenRoom;
 
+import net.lapasa.rfdhotdealswidget.DealsWidgetProvider;
+import net.lapasa.rfdhotdealswidget.R;
+import net.lapasa.rfdhotdealswidget.model.NewsItem;
+import net.lapasa.rfdhotdealswidget.model.NewsItemsDTO;
+
+import org.xml.sax.SAXException;
+
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+
+import nl.matshofman.saxrssreader.RssFeed;
+import nl.matshofman.saxrssreader.RssItem;
+import nl.matshofman.saxrssreader.RssReader;
+
 public class InvalidateDataStoreService extends IntentService
 {
 	private static final String RSS_HOT_DEALS = "http://forums.redflagdeals.com/external.php?type=RSS2&forumids=9";
@@ -53,6 +54,7 @@ public class InvalidateDataStoreService extends IntentService
 	private NewsItemsDTO dto;
 	private SharedPreferences prefs;
 	private Context context;
+	private NotificationService notificationService;
 
 	/**
 	 * Default construtor
@@ -84,6 +86,7 @@ public class InvalidateDataStoreService extends IntentService
 		LightedGreenRoom.setup(context);
 		LightedGreenRoom.s_registerClient();
 		dto = new NewsItemsDTO(context);
+		notificationService = new NotificationService();
 	}
 
 	/**
@@ -196,6 +199,8 @@ public class InvalidateDataStoreService extends IntentService
 			updateFooter(footerMsg);
 
 			dto.save(downloadedNewsItems, widgetId);
+
+			//
 		}
 		else
 		{

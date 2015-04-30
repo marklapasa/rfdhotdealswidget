@@ -7,7 +7,8 @@
         android:id="@+id/action_add_filter"
         android:title="ADD"
         android:orderInCategory="100"
-        app:showAsAction="always"/>
+        app:showAsAction="always"
+        android:icon="@drawable/ic_action_content_add_box"/>
 
     <item
         android:id="@+id/action_expand_all"
@@ -16,7 +17,7 @@
         app:showAsAction="never"/>
     <item
         android:id="@+id/action_collapse_all"
-        android:title="Expand All"
+        android:title="Collapse All"
         android:orderInCategory="100"
         app:showAsAction="never"/>
 
@@ -37,4 +38,11 @@
         android:title="Group By Enabled"
         android:orderInCategory="100"
         app:showAsAction="never"/>
+
+    <item
+        android:id="@+id/action_reset"
+        android:title="Reset"
+        android:orderInCategory="100"
+        app:showAsAction="never"/>
+
 </menu>

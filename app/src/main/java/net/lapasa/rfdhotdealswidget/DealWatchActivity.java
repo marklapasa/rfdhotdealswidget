@@ -6,6 +6,9 @@ import android.app.FragmentTransaction;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
 
+import net.lapasa.rfdhotdealswidget.fragments.DealWatchListFragment;
+import net.lapasa.rfdhotdealswidget.model.entities.DealWatchRecord;
+
 
 public class DealWatchActivity extends ActionBarActivity
 {
@@ -15,6 +18,7 @@ public class DealWatchActivity extends ActionBarActivity
     {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_deal_watch);
+        DealWatchRecord.purgeExpired();
         launchFragment(new DealWatchListFragment());
     }
 
@@ -50,4 +54,6 @@ public class DealWatchActivity extends ActionBarActivity
     {
         getActionBar().setTitle(title);
     }
+
+
 }

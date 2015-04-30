@@ -28,7 +28,7 @@
             android:value="deal_watch.db"/>
         <meta-data
             android:name="VERSION"
-            android:value="1"/>
+            android:value="4"/>
         <meta-data
             android:name="DOMAIN_PACKAGE_NAME"
             android:value="net.lapasa.rfdhotdealswidget.model.entities"/>
@@ -89,7 +89,7 @@
         <activity
             android:name=".DealWatchActivity"
             android:label="@string/title_activity_deal_watch"
-            android:theme="@style/Theme.AppCompat.Light">
+            android:theme="@style/rfdhotdeals">
             <!-- For testing purposes -->
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>

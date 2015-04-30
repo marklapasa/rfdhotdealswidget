@@ -17,9 +17,8 @@ package net.lapasa.rfdhotdealswidget.model;
 
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
-import android.database.sqlite.SQLiteStatement;
-import android.database.sqlite.SQLiteDatabase.CursorFactory;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.database.sqlite.SQLiteStatement;
 import android.util.Log;
 
 public class NewsItemSQLHelper extends SQLiteOpenHelper
@@ -85,13 +84,13 @@ public class NewsItemSQLHelper extends SQLiteOpenHelper
 		return new String[]
 		{ 
 			ID, 
-			TITLE, 
-			LINK, 
-			PUB_DATE, 
-			DESCRIPTION, 
-			IS_UNREAD, 
-			THUMBNAIL,
-			WIDGET_ID
+			TITLE, 			// 1
+			LINK, 			// 2
+			PUB_DATE, 		// 3
+			DESCRIPTION, 	// 4
+			IS_UNREAD, 		// 5
+			THUMBNAIL,		// 6
+			WIDGET_ID		// 7
 		};
 	}
 	
