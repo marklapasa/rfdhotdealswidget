@@ -86,7 +86,7 @@ public class InvalidateDataStoreService extends IntentService
 		LightedGreenRoom.setup(context);
 		LightedGreenRoom.s_registerClient();
 		dto = new NewsItemsDTO(context);
-		notificationService = new NotificationService();
+		notificationService = new NotificationService(context);
 	}
 
 	/**
@@ -199,8 +199,7 @@ public class InvalidateDataStoreService extends IntentService
 			updateFooter(footerMsg);
 
 			dto.save(downloadedNewsItems, widgetId);
-
-			//
+			notificationService.prepareNotificationData(downloadedNewsItems);
 		}
 		else
 		{

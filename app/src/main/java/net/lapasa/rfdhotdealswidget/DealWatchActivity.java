@@ -13,6 +13,8 @@ import net.lapasa.rfdhotdealswidget.model.entities.DealWatchRecord;
 public class DealWatchActivity extends ActionBarActivity
 {
 
+    public static final String RECORD_ID = "RECORD_ID";
+
     @Override
     protected void onCreate(Bundle savedInstanceState)
     {
