@@ -14,7 +14,18 @@ import java.util.Map;
 
 public class NotificationService
 {
-    private final List<DealWatchRecord> filters;
+    public List<DealWatchRecord> getFilters()
+    {
+        return filters;
+    }
+
+    public void setFilters(List<DealWatchRecord> filters)
+    {
+        this.filters.clear();
+        this.filters.addAll(filters);
+    }
+
+    private final List<DealWatchRecord> filters = new ArrayList<DealWatchRecord>();
     private final List<NotificationRecord> pendingNotificationRecords;
     private final Context context;
 
@@ -22,12 +33,13 @@ public class NotificationService
      * A single DealWatchRecord can represent multiple NewsItem records
      */
     private Map<DealWatchRecord, List<NewsItem>> map = new HashMap<DealWatchRecord, List<NewsItem>>();
+    public List<NotificationRecord> notificationRecords;
 
     public NotificationService(Context context)
     {
         this.context = context;
-        filters = DealWatchRecord.getAllRecords();
         pendingNotificationRecords = NotificationRecord.getAllRecords();
+        notificationRecords = new ArrayList<NotificationRecord>();
     }
 
     /**
@@ -35,7 +47,7 @@ public class NotificationService
      *
      * @param newsItems
      */
-    public void prepareNotificationData(List<NewsItem> newsItems)
+    public void runNotifications(List<NewsItem> newsItems)
     {
         for (NewsItem newsItem : newsItems)
         {
@@ -51,8 +63,11 @@ public class NotificationService
                     if (newsItemValues == null)
                     {
                         newsItemValues = new ArrayList<NewsItem>();
+                        map.put(filter, newsItemValues);
                     }
                     newsItemValues.add(newsItem);
+
+
                 }
             }
         }
@@ -135,14 +150,8 @@ public class NotificationService
 
     private void launchNotifications()
     {
-        List<NotificationRecord> archivedNotifications = NotificationRecord.find(NotificationRecord.class, null, null);
-        DispatchNotificationCommand cmd = new DispatchNotificationCommand(context, archivedNotifications);
-
-    }
-
-
-    public void createUpdateNotifications()
-    {
+        notificationRecords = NotificationRecord.find(NotificationRecord.class, null, null);
+        new DispatchNotificationCommand(context, notificationRecords).execute();
 
     }
 

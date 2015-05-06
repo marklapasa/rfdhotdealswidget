@@ -1,10 +1,12 @@
 package net.lapasa.rfdhotdealswidget.model.entities;
 
 import com.orm.SugarRecord;
+import com.orm.dsl.Table;
 
 /**
  * A NotificationRecord is made of many of these NewsItemNotificationRecords
  */
+@Table(name = "NOTIFICATION_NEWS_ITEM_RECORD")
 public class NotificationNewsItemRecord extends SugarRecord
 {
     public NotificationRecord getOwner()

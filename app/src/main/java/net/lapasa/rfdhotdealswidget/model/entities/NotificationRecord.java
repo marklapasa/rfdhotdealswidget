@@ -13,7 +13,7 @@ import java.util.List;
  * Persist the notification for a DealWatchRecordMatch. Delete when the user
  * has dealt with this record.
  */
-@Table(name = "PENDING_NOTIFICATIO_RECORD")
+@Table(name = "NOTIFICATION_RECORD")
 public class NotificationRecord extends SugarRecord
 {
     public DealWatchRecord getOwner()
@@ -53,7 +53,7 @@ public class NotificationRecord extends SugarRecord
     }
 
     /**
-     * Filter news items whose notifications have not been previously persisted
+     * Filter news items whose notificationRecords have not been previously persisted
      *
      * @param list  original list
      * @return  modified list that removes items that have been previously persisted

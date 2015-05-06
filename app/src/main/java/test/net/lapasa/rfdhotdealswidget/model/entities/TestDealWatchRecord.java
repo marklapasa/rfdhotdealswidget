@@ -18,11 +18,13 @@ public class TestDealWatchRecord extends AndroidTestCase
     private static final String HELLO_WORLD = "Hello World";
     private static final String DUMMY_TITLE = "DUMMY_TITLE";
     private static final String DUMMY_DESC = "DUMMY_DESCRIPTION";
+    private NewsItemsDTO dto;
 
     @Override
     protected void setUp() throws Exception
     {
         super.setUp();
+        dto = new NewsItemsDTO(getContext());
     }
 
     @Override
@@ -31,6 +33,7 @@ public class TestDealWatchRecord extends AndroidTestCase
         super.tearDown();
         DealWatchRecord.deleteAll(DealWatchRecord.class);
         TermSpanRecord.deleteAll(TermSpanRecord.class);
+        dto.clearAll();
     }
 
     public void testCreate()
@@ -74,7 +77,6 @@ public class TestDealWatchRecord extends AndroidTestCase
 
         NewsItem newsItem = new NewsItem(rssItem, 2015L);
         newsItem.setId(2015L);
-        NewsItemsDTO dto = new NewsItemsDTO(getContext());
         dto.create(newsItem);
         assertTrue(newsItem.getId() > 0);
 

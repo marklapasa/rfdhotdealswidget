@@ -199,7 +199,7 @@ public class InvalidateDataStoreService extends IntentService
 			updateFooter(footerMsg);
 
 			dto.save(downloadedNewsItems, widgetId);
-			notificationService.prepareNotificationData(downloadedNewsItems);
+			notificationService.runNotifications(downloadedNewsItems);
 		}
 		else
 		{

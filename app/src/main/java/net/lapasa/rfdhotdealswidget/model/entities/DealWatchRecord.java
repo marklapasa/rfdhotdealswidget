@@ -73,7 +73,7 @@ public class DealWatchRecord extends SugarRecord
 
     public static List<DealWatchRecord> getAllRecords()
     {
-        return DealWatchRecord.find(DealWatchRecord.class, null);
+        return DealWatchRecord.find(DealWatchRecord.class, null, null);
     }
 
     public static void update(DealWatchRecord record)

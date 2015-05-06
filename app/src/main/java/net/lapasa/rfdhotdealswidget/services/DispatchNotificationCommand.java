@@ -31,27 +31,35 @@ public class DispatchNotificationCommand
 {
     private final NotificationManager notificationManager;
     private int NOTIFICATION_ID = 4112015;
-    private List<NotificationRecord> dealAlerts;
+    private List<NotificationRecord> notificationRecords;
     private Context context;
     String s = "Neque porro quisquam est qui $99.87 dolorem ipsum quia dolor sit amet, consectetur, adipisci velit. Neque porro quisquam est $45.22 qui dolorem ipsum quia dolor sit $1 amet, consectetur, adipisci velit. Neque porro quisquam est qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit. Neque porro quisquam est qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit. Neque porro quisquam est qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit.";
     private String price;
 
 
     private Pattern pricePattern = Pattern.compile("\\$\\d+(\\.\\d{1,2})?"); // \$\d+(\.\d{1,2})?
+    private PendingIntent deleteIntent;
 
 
-    public DispatchNotificationCommand(Context context, List<NotificationRecord> dealAlerts)
+    public DispatchNotificationCommand(Context context, List<NotificationRecord> notificationRecords)
     {
-        this.dealAlerts = dealAlerts;
+        this.notificationRecords = notificationRecords;
         this.context = context;
         this.notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
     }
 
     public void execute()
     {
-        for (NotificationRecord notificationData : dealAlerts)
+        for (NotificationRecord notificationData : notificationRecords)
         {
-            NotificationCompat.Builder builder = new NotificationCompat.Builder(context).setSmallIcon(R.mipmap.ic_launcher).setContentTitle(notificationData.getTitle()).setCategory(Notification.CATEGORY_EMAIL).setAutoCancel(true).setLights(0xff0000, 300, 1000).setContentIntent(getPendingIntent(notificationData));
+            NotificationCompat.Builder builder = new NotificationCompat.Builder(context)
+                    .setSmallIcon(R.mipmap.ic_launcher)
+                    .setContentTitle(notificationData.getTitle())
+                    .setCategory(Notification.CATEGORY_EMAIL)
+                    .setAutoCancel(true).setLights(0xff0000, 300, 1000)
+                    .setContentIntent(getPendingIntent(notificationData))
+                    .setDeleteIntent(getDeleteIntent());
+
 
             List<NotificationNewsItemRecord> newsItemIds = notificationData.fetchNewsItems();
             if (newsItemIds.size() == 1)
@@ -74,7 +82,7 @@ public class DispatchNotificationCommand
         Intent resultIntent = null;
         if (notificationNewsItemRecords.size() == 1)
         {
-            String url = "http://www.example.com";
+            String url = notificationData.getUrl();
             resultIntent = new Intent(Intent.ACTION_VIEW);
             resultIntent.setData(Uri.parse(url));
         }
@@ -106,7 +114,7 @@ public class DispatchNotificationCommand
 
     private CharSequence getContentText()
     {
-        if (dealAlerts.size() == 1)
+        if (notificationRecords.size() == 1)
         {
             List<String> targets = new ArrayList<>();
 
@@ -136,9 +144,9 @@ public class DispatchNotificationCommand
 
     private String getContentTitle()
     {
-        if (dealAlerts.size() == 1)
+        if (notificationRecords.size() == 1)
         {
-            Object dealAlert = dealAlerts.get(0);
+            Object dealAlert = notificationRecords.get(0);
             String keyword = "\"ssd\"" ; //dealAlert.getKeywords();
 
             if (price != null)
@@ -150,7 +158,7 @@ public class DispatchNotificationCommand
         }
         else
         {
-            return dealAlerts.size() + " Deals Found";
+            return notificationRecords.size() + " Deals Found";
         }
     }
 
@@ -177,5 +185,10 @@ public class DispatchNotificationCommand
     {
         sb.setSpan(new StyleSpan(Typeface.BOLD_ITALIC), startIndex, endIndex, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
         sb.setSpan(new ForegroundColorSpan(Color.RED), startIndex, endIndex, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+    }
+
+    public PendingIntent getDeleteIntent()
+    {
+        return PendingIntent.getActivity(context, 0, deleteIntent, PendingIntent.FLAG_UPDATE_CURRENT);
     }
 }

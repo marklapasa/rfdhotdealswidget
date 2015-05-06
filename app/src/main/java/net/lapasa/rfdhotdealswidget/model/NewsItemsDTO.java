@@ -226,10 +226,7 @@ public class NewsItemsDTO
 				NewsItemSQLHelper.WIDGET_ID + " = " + widgetId
 				+ " AND "
 				+ NewsItemSQLHelper.ID + " = " + newsItemId;
-		Cursor cursor = database.query(
-				NewsItemSQLHelper.TABLE_NEWS_ITEMS,
-				NewsItemSQLHelper.getAllColumns(),
-				whereClause, null, null, null, null);
+		Cursor cursor = database.query(NewsItemSQLHelper.TABLE_NEWS_ITEMS, NewsItemSQLHelper.getAllColumns(), whereClause, null, null, null, null);
 	
 		cursor.moveToFirst();
 		
@@ -397,5 +394,11 @@ public class NewsItemsDTO
 		
 		Log.d(TAG, "removeStale(widgetId = " +widgetId + ", threshold=" + threshold + "): " + rowsDeleted + " items were deleted from the DB");
 	}
-    
+
+	public void clearAll()
+	{
+		open();
+		database.execSQL("delete from " + NewsItemSQLHelper.TABLE_NEWS_ITEMS);
+		close();
+	}
 }
