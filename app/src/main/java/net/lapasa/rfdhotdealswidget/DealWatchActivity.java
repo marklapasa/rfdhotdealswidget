@@ -21,7 +21,17 @@ public class DealWatchActivity extends ActionBarActivity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_deal_watch);
         DealWatchRecord.purgeExpired();
-        launchFragment(new DealWatchListFragment());
+
+        Fragment frag = new DealWatchListFragment();
+        long existingDealWatchFilterId = getIntent().getLongExtra(DealWatchActivity.RECORD_ID, -1L);
+        if (existingDealWatchFilterId >= 0)
+        {
+            Bundle bundle = new Bundle();
+            bundle.putLong(DealWatchActivity.RECORD_ID, existingDealWatchFilterId);
+            frag.setArguments(bundle);
+        }
+
+        launchFragment(frag);
     }
 
     public void launchFragment(Fragment fragment)
@@ -29,7 +39,7 @@ public class DealWatchActivity extends ActionBarActivity
         String backStateName = fragment.getClass().getName();
         FragmentManager mgr = getFragmentManager();
 
-        boolean fragmentPopped = mgr.popBackStackImmediate (backStateName, 0);
+        boolean fragmentPopped = mgr.popBackStackImmediate(backStateName, 0);
         if (!fragmentPopped)
         {
             FragmentTransaction ft = mgr.beginTransaction();

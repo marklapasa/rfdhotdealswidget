@@ -42,4 +42,5 @@
     <string name="create_filter">Create Filter</string>
     <string name="edit_filter">Edit Filter</string>
     <string name="deal_watch">Deal Watch</string>
+    <string name="checking_rss_feed">Checking RSS Feed..</string>
 </resources>

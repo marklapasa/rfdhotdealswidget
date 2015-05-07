@@ -49,6 +49,13 @@
                 android:resource="@xml/rfdhotdeals_appwidget_info"/>
         </receiver>
 
+        <receiver android:name=".DeleteNotificationBroadcastReceiver"
+                  android:enabled="true">
+            <intent-filter>
+                <action android:name="notification_cancelled"/>
+            </intent-filter>
+        </receiver>
+
         <activity
             android:name=".MainActivity"
             android:theme="@style/AppBaseTheme">

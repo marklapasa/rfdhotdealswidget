@@ -14,8 +14,8 @@ public class TermSpanRecord extends SugarRecord
 
     public String columnName;
     public long newsItemId;
-    public long start;
-    public long end;
+    public int start;
+    public int end;
     public String keywords;
 
     public TermSpanRecord()

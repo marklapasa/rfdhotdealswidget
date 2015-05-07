@@ -27,6 +27,8 @@ public class DealWatchListFragment extends Fragment
 
     private ExpandableListView expandibleListView;
     private DealWatchListAdapter adapter;
+    private int lastExpandedPosition;
+    private boolean hasOpenedGroup;
 
     public DealWatchListFragment()
     {
@@ -110,7 +112,7 @@ public class DealWatchListFragment extends Fragment
         if (record != null)
         {
             Bundle bundle = new Bundle();
-            bundle.putString(CreateEditDealWatchFragment.EXISTING_RECORD_ID, String.valueOf(record.getId()));
+            bundle.putLong(CreateEditDealWatchFragment.EXISTING_RECORD_ID, record.getId());
             frag.setArguments(bundle);
         }
         ((DealWatchActivity) getActivity()).launchFragment(frag);
@@ -152,10 +154,50 @@ public class DealWatchListFragment extends Fragment
 
         expandibleListView.setAdapter(adapter);
 
+        // From http://stackoverflow.com/a/17586315/855984
+        expandibleListView.setOnGroupExpandListener(new ExpandableListView.OnGroupExpandListener()
+        {
+            @Override
+            public void onGroupExpand(int groupPosition)
+            {
+                if (lastExpandedPosition != -1 && groupPosition != lastExpandedPosition)
+                {
+                    expandibleListView.collapseGroup(lastExpandedPosition);
+                }
+                lastExpandedPosition = groupPosition;
+            }
+        });
 
+        if (getArguments() != null)
+        {
+            long targetDealWatchToBeOpened = getArguments().getLong(DealWatchActivity.RECORD_ID, -1L);
+            if (targetDealWatchToBeOpened >= 0)
+            {
+                openById(targetDealWatchToBeOpened);
+            }
+        }
 
     }
 
+    public void openById(long targetDealWatchToBeOpened)
+    {
+        // Figure out index of DealWatchFilter record that has this id
+        int targetIndex = -1;
+        for (int i = 0; i < adapter.getGroupCount(); i++)
+        {
+            DealWatchRecord record = (DealWatchRecord) adapter.getGroup(i);
+            if (record.getId() == targetDealWatchToBeOpened)
+            {
+                targetIndex = i;
+                break;
+            }
+        }
+
+        if (targetIndex >= 0)
+        {
+            expandibleListView.expandGroup(targetIndex);
+        }
+    }
     /**
      * Get the DealWatchRecord and query the NewsItem db for matches
      *

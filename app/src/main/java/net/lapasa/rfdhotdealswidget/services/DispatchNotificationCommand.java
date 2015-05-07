@@ -6,22 +6,20 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.Color;
-import android.graphics.Typeface;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.support.v4.app.NotificationCompat;
 import android.text.Spannable;
 import android.text.SpannableString;
-import android.text.style.ForegroundColorSpan;
-import android.text.style.StyleSpan;
 
 import net.lapasa.rfdhotdealswidget.DealWatchActivity;
+import net.lapasa.rfdhotdealswidget.DeleteNotificationBroadcastReceiver;
 import net.lapasa.rfdhotdealswidget.R;
 import net.lapasa.rfdhotdealswidget.model.entities.NotificationNewsItemRecord;
 import net.lapasa.rfdhotdealswidget.model.entities.NotificationRecord;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -30,14 +28,11 @@ import java.util.regex.Pattern;
 public class DispatchNotificationCommand
 {
     private final NotificationManager notificationManager;
-    private int NOTIFICATION_ID = 4112015;
     private List<NotificationRecord> notificationRecords;
     private Context context;
-    String s = "Neque porro quisquam est qui $99.87 dolorem ipsum quia dolor sit amet, consectetur, adipisci velit. Neque porro quisquam est $45.22 qui dolorem ipsum quia dolor sit $1 amet, consectetur, adipisci velit. Neque porro quisquam est qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit. Neque porro quisquam est qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit. Neque porro quisquam est qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit.";
-    private String price;
 
 
-    private Pattern pricePattern = Pattern.compile("\\$\\d+(\\.\\d{1,2})?"); // \$\d+(\.\d{1,2})?
+    public static Pattern pricePattern = Pattern.compile("\\$\\d+(\\.\\d{1,2})?"); // \$\d+(\.\d{1,2})?
     private PendingIntent deleteIntent;
 
 
@@ -52,25 +47,30 @@ public class DispatchNotificationCommand
     {
         for (NotificationRecord notificationData : notificationRecords)
         {
+            int notificationId = safeLongToInt(notificationData.getId());
+            Bitmap bmp = BitmapFactory.decodeResource(context.getResources(), R.drawable.ic_launcher);
             NotificationCompat.Builder builder = new NotificationCompat.Builder(context)
-                    .setSmallIcon(R.mipmap.ic_launcher)
+                    .setSmallIcon(R.drawable.ic_money2)
                     .setContentTitle(notificationData.getTitle())
+                    .setContentText(getContentText())
                     .setCategory(Notification.CATEGORY_EMAIL)
                     .setAutoCancel(true).setLights(0xff0000, 300, 1000)
                     .setContentIntent(getPendingIntent(notificationData))
-                    .setDeleteIntent(getDeleteIntent());
+                    .setDeleteIntent(getDeleteIntent(notificationId))
+                    .setTicker("Deal Alert: " + notificationData.getTitle())
+                    .setLargeIcon(bmp);
 
 
             List<NotificationNewsItemRecord> newsItemIds = notificationData.fetchNewsItems();
-            if (newsItemIds.size() == 1)
-            {
-                NotificationCompat.BigTextStyle bigTextStyle = new NotificationCompat.BigTextStyle();
-                bigTextStyle.bigText(notificationData.getBody());
-                builder.setStyle(bigTextStyle);
-            }
+//            if (newsItemIds.size() == 1)
+//            {
+//                NotificationCompat.BigTextStyle bigTextStyle = new NotificationCompat.BigTextStyle();
+//                bigTextStyle.bigText(notificationData.getBody());
+//                builder.setStyle(bigTextStyle);
+//            }
 
-            int id = safeLongToInt(notificationData.getId());
-            notificationManager.notify(id, builder.build());
+
+            notificationManager.notify(notificationId, builder.build());
         }
     }
 
@@ -89,7 +89,7 @@ public class DispatchNotificationCommand
         else
         {
             // Dummy int data
-            int id = getRecordId();
+            long id = notificationData.getOwner().getId();
             resultIntent = new Intent(context, DealWatchActivity.class);
             resultIntent.putExtra(DealWatchActivity.RECORD_ID, id);
         }
@@ -97,13 +97,8 @@ public class DispatchNotificationCommand
         return PendingIntent.getActivity(context, 0, resultIntent, PendingIntent.FLAG_UPDATE_CURRENT);
     }
 
-    private int getRecordId()
-    {
-        // TODO: Iterate through
-        return safeLongToInt(new Date().getTime());
-    }
 
-    private int safeLongToInt(long l)
+    public static int safeLongToInt(long l)
     {
         if (l < Integer.MIN_VALUE || l > Integer.MAX_VALUE)
         {
@@ -116,49 +111,22 @@ public class DispatchNotificationCommand
     {
         if (notificationRecords.size() == 1)
         {
+            NotificationRecord notificationRecord = notificationRecords.get(0);
             List<String> targets = new ArrayList<>();
 
-            Matcher m = pricePattern.matcher(s);
+            Matcher m = pricePattern.matcher(notificationRecord.getBody());
 
             while(m.find())
             {
                 targets.add(m.group());
             }
 
-            return highlight(s, targets);
+            return highlight(notificationRecord.getBody(), targets);
 
         }
         else
         {
-            // TODO: Iterate through the dealWatch collection and get the keywords
-            StringBuilder builder = new StringBuilder();
-            builder.append("\"ssd\"");
-            builder.append(", ");
-            builder.append("\"newegg\"");
-            builder.append(", ");
-            builder.append("\"walmart\"");
-
-            return "Keywords: " +builder.toString();
-        }
-    }
-
-    private String getContentTitle()
-    {
-        if (notificationRecords.size() == 1)
-        {
-            Object dealAlert = notificationRecords.get(0);
-            String keyword = "\"ssd\"" ; //dealAlert.getKeywords();
-
-            if (price != null)
-            {
-                keyword += " for " + price;
-            }
-
-            return "New Deal Alert: " + keyword;
-        }
-        else
-        {
-            return notificationRecords.size() + " Deals Found";
+            return "Tap to open Deal Watch List";
         }
     }
 
@@ -183,12 +151,20 @@ public class DispatchNotificationCommand
 
     public static void setStyle(Spannable sb, int startIndex, int endIndex)
     {
-        sb.setSpan(new StyleSpan(Typeface.BOLD_ITALIC), startIndex, endIndex, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-        sb.setSpan(new ForegroundColorSpan(Color.RED), startIndex, endIndex, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+//        sb.setSpan(new StyleSpan(Typeface.BOLD_ITALIC), startIndex, endIndex, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+//        sb.setSpan(new ForegroundColorSpan(Color.RED), startIndex, endIndex, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
     }
 
-    public PendingIntent getDeleteIntent()
+    /**
+     * When the user dismisses a notification, delete the corresponding Notification Record
+     * @return
+     * @param notificationId
+     */
+    public PendingIntent getDeleteIntent(int notificationId)
     {
-        return PendingIntent.getActivity(context, 0, deleteIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+        Intent deleteIntent = new Intent(context, DeleteNotificationBroadcastReceiver.class);
+        deleteIntent.setAction(DeleteNotificationBroadcastReceiver.NOTIFICATION_CANCELLED);
+        deleteIntent.putExtra(NotificationRecord._ID, notificationId);
+        return PendingIntent.getBroadcast(context, notificationId, deleteIntent, PendingIntent.FLAG_CANCEL_CURRENT);
     }
 }

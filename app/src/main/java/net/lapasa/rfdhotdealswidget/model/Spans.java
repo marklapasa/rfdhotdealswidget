@@ -23,12 +23,12 @@ public class Spans
         }
         else if (type == DealWatchRecord.FILTER_OR)
         {
-            this.pattern = Pattern.compile(getDisjunctionRegEx(targetStr));
+            this.pattern = Pattern.compile(getDisjunctionRegEx(targetStr), Pattern.CASE_INSENSITIVE);
             search();
         }
         else if (type == DealWatchRecord.FILTER_EXACT)
         {
-            this.pattern = Pattern.compile(targetStr);
+            this.pattern = Pattern.compile(targetStr, Pattern.CASE_INSENSITIVE);
             search();
         }
 

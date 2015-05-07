@@ -16,6 +16,8 @@ import java.util.List;
 @Table(name = "NOTIFICATION_RECORD")
 public class NotificationRecord extends SugarRecord
 {
+    public static final String _ID = "id";
+
     public DealWatchRecord getOwner()
     {
         return owner;
@@ -112,5 +114,23 @@ public class NotificationRecord extends SugarRecord
         String whereClause = "owner = ?";
         String[] whereArgs = new String[]{String.valueOf(getId())};
         return NotificationNewsItemRecord.find(NotificationNewsItemRecord.class, whereClause, whereArgs);
+    }
+
+    public static NotificationRecord getById(long id)
+    {
+        String whereClause = "id = ?";
+
+        String whereArgs = String.valueOf(id);
+        List<NotificationRecord> notificationRecords = find(NotificationRecord.class, whereClause, whereArgs);
+        boolean a = notificationRecords != null;
+        boolean b = notificationRecords.size() == 1;
+        if (a && b)
+        {
+            return notificationRecords.get(0);
+        }
+        else
+        {
+            return null;
+        }
     }
 }

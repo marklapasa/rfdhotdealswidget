@@ -21,7 +21,7 @@ public class TestNotificationService extends AndroidTestCase
     private NotificationService notificationService;
     private NewsItemsDTO newsItemsDTO;
 
-    private static final String DUMMY_DESC = "DUMMY DESCRIPTION";
+    private static final String DUMMY_DESC = "DUMMY DESCRIPTION $10.00";
 
     @Override
     protected void setUp() throws Exception
@@ -86,7 +86,7 @@ public class TestNotificationService extends AndroidTestCase
     {
         // Create news item
         RssItem rssItem = new RssItem();
-        rssItem.setTitle("123456 hello, World 123456");
+        rssItem.setTitle("Click on this notification to Open Google - 10%");
         //                012345678901234567890123
         rssItem.setDescription(DUMMY_DESC);
         rssItem.setPubDate(new Date());
@@ -102,10 +102,13 @@ public class TestNotificationService extends AndroidTestCase
         List<NewsItem> singleItemList = new ArrayList<NewsItem>();
         singleItemList.add(newsItem);
 
+        assertNotNull(newsItem.getBody());
+        assertTrue(newsItem.getBody().length() > 0);
+
         // Create filter
         DealWatchRecord dealWatchRecord = new DealWatchRecord();
         assertNull(dealWatchRecord.getId());
-        dealWatchRecord.keywords = DUMMY_DESC;
+        dealWatchRecord.keywords = "DUMMY";
         dealWatchRecord.save();
         assertTrue(dealWatchRecord.getId() > 0);
 
@@ -131,7 +134,7 @@ public class TestNotificationService extends AndroidTestCase
 
         // Create 2 news item
         RssItem rssItem = new RssItem();
-        rssItem.setTitle("123456 hello, World 123456");
+        rssItem.setTitle("(First) - 123456 hello, World 123456 $20.00");
         //                012345678901234567890123
         rssItem.setDescription(DUMMY_DESC);
         rssItem.setPubDate(new Date());
@@ -149,7 +152,7 @@ public class TestNotificationService extends AndroidTestCase
 
         // Create the second news item
         rssItem = new RssItem();
-        rssItem.setTitle("____World");
+        rssItem.setTitle("(Second) ____World $300.22");
         //                012345678901234567890123
         rssItem.setDescription(DUMMY_DESC);
         rssItem.setPubDate(new Date());
@@ -185,6 +188,35 @@ public class TestNotificationService extends AndroidTestCase
     }
 
 
+    public void testGetNotificationById()
+    {
+        // Persist notification record
+        NotificationRecord record = new NotificationRecord();
+        record.setBody(DUMMY_DESC);
+        assertNull(record.getId());
+
+        record.save();
+        assertNotNull(record.getId());
+
+
+        // Test retrieval of that record
+        NotificationRecord rec2 = record.getById(record.getId());
+        assertNotNull(rec2);
+        assertNotNull(rec2.getId());
+        assertEquals(DUMMY_DESC, rec2.getBody());
+    }
+
+    public void testInvalidNotificationById()
+    {
+        NotificationRecord rec2 = new NotificationRecord();
+        assertNotNull(rec2);
+        assertNull(rec2.getId());
+
+
+        NotificationRecord nullRec = rec2.getById(-2015);
+        assertNull(nullRec);
+
+    }
 
 
 

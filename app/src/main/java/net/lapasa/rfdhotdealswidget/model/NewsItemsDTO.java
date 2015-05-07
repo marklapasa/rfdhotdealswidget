@@ -22,6 +22,8 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteStatement;
 import android.util.Log;
 
+import net.lapasa.rfdhotdealswidget.services.NotificationService;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -34,11 +36,13 @@ public class NewsItemsDTO
 	private SQLiteDatabase database;
 	private NewsItemSQLHelper dbHelper;
 	private Context context;
-	
+	private NotificationService notificationService;
+
 	public NewsItemsDTO(Context context)
 	{
 		dbHelper = new NewsItemSQLHelper(context);
 		this.context = context;
+		notificationService = new NotificationService(context);
 	}
 	
 	public void open() throws SQLException
@@ -274,6 +278,8 @@ public class NewsItemsDTO
 				Log.d(TAG, "News Item Record created, id = " + insertId + " for widgetId = " + newsItem.getWidgetId());
 			}
 			close();
+
+			notificationService.runNotifications(bulkNewsItems);
 		}
 		else
 		{

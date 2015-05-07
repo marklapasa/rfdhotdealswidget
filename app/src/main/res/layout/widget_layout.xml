@@ -50,11 +50,21 @@
             android:src="@drawable/ic_action_settings" />
 
         <ImageButton
+            android:id="@+id/dealWatchBtn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_toLeftOf="@id/settings"
+            android:background="@null"
+            android:layout_centerVertical="true"
+            android:src="@drawable/ic_action_action_alarm"/>
+
+
+        <ImageButton
             android:id="@+id/downloadBtn"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerVertical="true"
-            android:layout_toLeftOf="@id/settings"
+            android:layout_toLeftOf="@id/dealWatchBtn"
             android:background="@null"
             android:paddingRight="3dp"
             android:src="@drawable/ic_download"
@@ -65,10 +75,11 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerVertical="true"
-            android:layout_toLeftOf="@id/settings"
+            android:layout_toLeftOf="@id/dealWatchBtn"
             android:background="@null"
             android:paddingRight="3dp"
-            android:src="@drawable/ic_action_refresh" />
+            android:src="@drawable/ic_downloading" />
+
 
         <TextView
             android:id="@+id/bigText"

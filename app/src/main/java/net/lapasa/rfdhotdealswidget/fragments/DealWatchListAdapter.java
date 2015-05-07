@@ -1,13 +1,16 @@
 package net.lapasa.rfdhotdealswidget.fragments;
 
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.database.DataSetObserver;
 import android.graphics.Bitmap;
 import android.net.Uri;
-import android.text.Editable;
 import android.text.InputFilter;
-import android.text.SpannableStringBuilder;
+import android.text.Spannable;
+import android.text.SpannableString;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseExpandableListAdapter;
@@ -21,6 +24,7 @@ import net.lapasa.rfdhotdealswidget.Utils;
 import net.lapasa.rfdhotdealswidget.model.NewsItem;
 import net.lapasa.rfdhotdealswidget.model.entities.DealWatchRecord;
 import net.lapasa.rfdhotdealswidget.model.entities.TermSpanRecord;
+import net.lapasa.rfdhotdealswidget.services.DispatchNotificationCommand;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -28,15 +32,17 @@ import java.util.List;
 
 public class DealWatchListAdapter extends BaseExpandableListAdapter implements View.OnClickListener
 {
+    private static final String HAS_OPENED_BEFORE = "firstExpansion";
     private int targetLayoutId = Utils.getNewsItemLayout();
     private final Context context;
     List<DealWatchRecord> records;
     private List<NewsItem> cachedNewsItems = new ArrayList<NewsItem>();
-
+    final SharedPreferences sharedPreferences;
     public DealWatchListAdapter(Context context)
     {
         this.records = new ArrayList<DealWatchRecord>();
         this.context = context;
+        sharedPreferences = context.getSharedPreferences(DealWatchListFragment.class.getName(), Context.MODE_PRIVATE);
     }
 
     public void addCachedNewsRecords(List<NewsItem> items)
@@ -62,6 +68,10 @@ public class DealWatchListAdapter extends BaseExpandableListAdapter implements V
     public int getChildrenCount(int groupPosition)
     {
         DealWatchRecord dealWatchRecord = records.get(groupPosition);
+        if (dealWatchRecord == null || dealWatchRecord.filteredNewsItems == null)
+        {
+            return 0;
+        }
         return dealWatchRecord.filteredNewsItems.size();
     }
 
@@ -140,6 +150,33 @@ public class DealWatchListAdapter extends BaseExpandableListAdapter implements V
         }
 
 
+        boolean hasOpenedGroup = sharedPreferences.getBoolean(HAS_OPENED_BEFORE, false);
+        if (!hasOpenedGroup)
+        {
+            v.setOnClickListener(new View.OnClickListener()
+            {
+                @Override
+                public void onClick(View v)
+                {
+                    AlertDialog.Builder builder = new AlertDialog.Builder(context);
+                    builder.setTitle("Tip");
+                    builder.setMessage("Long press on filter to edit");
+                    builder.setPositiveButton("OK", new DialogInterface.OnClickListener()
+                    {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which)
+                        {
+                            SharedPreferences.Editor editor = sharedPreferences.edit();
+                            editor.putBoolean(HAS_OPENED_BEFORE, true);
+                            editor.apply();
+                        }
+                    });
+                    builder.show();
+                }
+            });
+        }
+
+
         // Clear
         return v;
     }
@@ -165,7 +202,7 @@ public class DealWatchListAdapter extends BaseExpandableListAdapter implements V
         bodyTextView.setText(null);
         dateTextView.setText(null);
 
-        Editable formattedTitle = applySpans(newsItem.getTitle(), record.getResults());
+        String formattedTitle = applySpans(newsItem.getTitle(), record.getResults());
         titleTextView.setText(formattedTitle);
         bodyTextView.setMaxLines(1000);
         bodyTextView.setFilters(new InputFilter[]{});
@@ -185,10 +222,15 @@ public class DealWatchListAdapter extends BaseExpandableListAdapter implements V
         return v;
     }
 
-    private Editable applySpans(String title, List<TermSpanRecord> results)
+    private String applySpans(String title, List<TermSpanRecord> results)
     {
-        Editable e = new SpannableStringBuilder();
-        return e;
+        Spannable sb = new SpannableString(title);
+
+        for (TermSpanRecord termSpanRecord : results)
+        {
+            DispatchNotificationCommand.setStyle(sb, termSpanRecord.start, termSpanRecord.end);
+        }
+        return sb.toString();
     }
 
     private void setThumbnailOnNewsItem(String thumbnailUrl, ImageView imageView)
@@ -240,4 +282,6 @@ public class DealWatchListAdapter extends BaseExpandableListAdapter implements V
         i.setData(Uri.parse(targetUrl));
         context.startActivity(i);
     }
+
+
 }

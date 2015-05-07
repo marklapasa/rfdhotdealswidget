@@ -11,9 +11,13 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class NotificationService
 {
+    private Pattern discountPattern = Pattern.compile("\\d+%?");
+
     public List<DealWatchRecord> getFilters()
     {
         return filters;
@@ -49,6 +53,8 @@ public class NotificationService
      */
     public void runNotifications(List<NewsItem> newsItems)
     {
+        setFilters(DealWatchRecord.getAllRecords());
+
         for (NewsItem newsItem : newsItems)
         {
             // For each NewsItem, run it through the filters
@@ -102,7 +108,7 @@ public class NotificationService
 
     private String getFormattedTitle(int size, String keywords)
     {
-        return String.valueOf(size) + " deals found for " + keywords;
+        return String.valueOf(size) + " deals found for \"" + keywords + "\"";
     }
 
     /**
@@ -118,8 +124,9 @@ public class NotificationService
                 // Create notification that would showcase a single news item
                 NotificationRecord newSingleNotificationRecord = new NotificationRecord();
                 NewsItem singleNewsItem = newsItems.get(0);
-                newSingleNotificationRecord.setTitle(singleNewsItem.getTitle());
+                newSingleNotificationRecord.setTitle(composeTitle(singleNewsItem.getTitle(), dealWatchRecord));
                 newSingleNotificationRecord.setBody(singleNewsItem.getBody());
+                newSingleNotificationRecord.setUrl(singleNewsItem.getUrl());
                 newSingleNotificationRecord.save();
 
                 NotificationNewsItemRecord singleNotificationNewsItemRecord = new NotificationNewsItemRecord();
@@ -132,6 +139,7 @@ public class NotificationService
                 // Create notification data that would reflect multiple records
                 NotificationRecord newMultiNotificationRecord = new NotificationRecord();
                 newMultiNotificationRecord.setTitle(getFormattedTitle(newsItems.size(), dealWatchRecord.keywords)); // "4 deals found for 'ssd'"
+                newMultiNotificationRecord.setBody("Tap to open Deals Watch List");
                 newMultiNotificationRecord.save();
 
                 for (NewsItem newsItem : newsItems)
@@ -146,6 +154,46 @@ public class NotificationService
 
         // Launch all archived notification items
         launchNotifications();
+    }
+
+    /**
+     * "ssd" for $100
+     * "ssd" at 10% off
+     *
+     * @param title
+     * @param dealWatchRecord
+     * @return
+     */
+    private String composeTitle(String title, DealWatchRecord dealWatchRecord)
+    {
+        String newTitle = title;
+        // Primary - Is there a dollar amount
+        Matcher m = DispatchNotificationCommand.pricePattern.matcher(title);
+        List<String> amts = new ArrayList<>();
+        while(m.find())
+        {
+            amts.add(m.group());
+        }
+
+        if (amts.size() > 0)
+        {
+            newTitle = "\"" + dealWatchRecord.keywords + "\" for " + amts.get(0);
+        }
+        else
+        {
+            // Secondary - Is there  a percentage amount?
+            m = discountPattern.matcher(title);
+            while(m.find())
+            {
+                amts.add(m.group());
+            }
+            if (amts.size() > 0)
+            {
+                newTitle = "\"" + dealWatchRecord.keywords + "\" at " + amts.get(0) + " off";
+            }
+        }
+
+        return newTitle;
     }
 
     private void launchNotifications()

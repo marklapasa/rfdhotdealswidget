@@ -2,6 +2,7 @@ package net.lapasa.rfdhotdealswidget.fragments;
 
 import android.app.AlertDialog;
 import android.app.Fragment;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -11,6 +12,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.RadioGroup;
@@ -86,17 +88,43 @@ public class CreateEditDealWatchFragment extends Fragment implements DialogInter
     {
         if (item.getItemId() == R.id.action_save)
         {
-            if (isValidForm())
+            if (isValidForm(null))
             {
                 save();
                 getFragmentManager().popBackStack();
             }
         }
+        else if (item.getItemId() == R.id.action_update)
+        {
+            if (isValidForm(dealWatchRecord.keywords))
+            {
+                save();
+                getFragmentManager().popBackStack();
+
+            }
+        }
+        else if (item.getItemId() == R.id.action_delete)
+        {
+            dealWatchRecord.delete();
+            getFragmentManager().popBackStack();
+        }
         return super.onOptionsItemSelected(item);
     }
 
-    private boolean isValidForm()
+    /**
+     * Return true if this is unique. However if this is in the context of an update operation, it should be allowed to be not unique
+     *
+     * @param keywords  If not null, this is an update operation in which case it is permissible to return true
+     *                  if the keywords in the parameter equaal the existing keywords in the current dealwatch filter record
+     * @return
+     */
+    private boolean isValidForm(String keywords)
     {
+        if (keywords != null && !keywords.isEmpty())
+        {
+            return DealWatchRecord.isExistingFilter(keywords);
+        }
+
         boolean isValid = true;
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         builder.setPositiveButton("OK", this);
@@ -166,7 +194,6 @@ public class CreateEditDealWatchFragment extends Fragment implements DialogInter
             expirationRadioGroup.check(R.id._90days);
             expirationDatePicker.setVisibility(View.GONE);
         }
-
 
         return v;
     }
@@ -276,5 +303,14 @@ public class CreateEditDealWatchFragment extends Fragment implements DialogInter
     public void onClick(DialogInterface dialog, int which)
     {
         keywordField.requestFocus();
+    }
+
+    @Override
+    public void onActivityCreated(Bundle savedInstanceState)
+    {
+        super.onActivityCreated(savedInstanceState);
+
+        InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+        imm.showSoftInput(keywordField, InputMethodManager.SHOW_IMPLICIT);
     }
 }

@@ -15,7 +15,7 @@
         android:id="@+id/action_update"
         android:title="UPDATE"
         android:orderInCategory="100"
-        android:icon="@drawable/ic_action_navigation_check"
+        android:icon="@drawable/ic_action_content_save"
         app:showAsAction="always" />
 
 </menu>

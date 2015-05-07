@@ -54,7 +54,6 @@ public class InvalidateDataStoreService extends IntentService
 	private NewsItemsDTO dto;
 	private SharedPreferences prefs;
 	private Context context;
-	private NotificationService notificationService;
 
 	/**
 	 * Default construtor
@@ -86,7 +85,6 @@ public class InvalidateDataStoreService extends IntentService
 		LightedGreenRoom.setup(context);
 		LightedGreenRoom.s_registerClient();
 		dto = new NewsItemsDTO(context);
-		notificationService = new NotificationService(context);
 	}
 
 	/**
@@ -128,7 +126,7 @@ public class InvalidateDataStoreService extends IntentService
 		widgetId = broadcastIntent.getIntExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, AppWidgetManager.INVALID_APPWIDGET_ID);
 		prefs = context.getSharedPreferences(DealsWidgetProvider.NAMESPACE + widgetId, Context.MODE_PRIVATE);
 
-		updateFooter("Checking RSS Feed..");
+		updateFooter(getString(R.string.checking_rss_feed));
 
 		// Invalidate datastore here
 		Log.d(TAG, "handleBroadcastIntent(): Retriving RSS News Items to be cached");
@@ -199,7 +197,7 @@ public class InvalidateDataStoreService extends IntentService
 			updateFooter(footerMsg);
 
 			dto.save(downloadedNewsItems, widgetId);
-			notificationService.runNotifications(downloadedNewsItems);
+
 		}
 		else
 		{

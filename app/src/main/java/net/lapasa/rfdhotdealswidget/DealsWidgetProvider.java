@@ -393,6 +393,10 @@ public class DealsWidgetProvider extends AppWidgetProvider
 			PendingIntent refreshIntent = PendingIntent.getBroadcast(context, 0, refreshBtnIntent, PendingIntent.FLAG_CANCEL_CURRENT);
 			rv.setOnClickPendingIntent(R.id.downloadBtn, refreshIntent);
 
+			Intent dealWatchIntent = new Intent(context, DealWatchActivity.class);
+			PendingIntent pendingDealWatchIntent = PendingIntent.getActivity(context, 0, dealWatchIntent, PendingIntent.FLAG_CANCEL_CURRENT);
+			rv.setOnClickPendingIntent(R.id.dealWatchBtn, pendingDealWatchIntent);
+
 			// Set Alarm to update this widget
 			setRepeatingRefreshAlarm(context, widgetId, DEFAULT_REFRESH_FREQUENCY);
 

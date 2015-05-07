@@ -8,7 +8,7 @@
         android:title="ADD"
         android:orderInCategory="100"
         app:showAsAction="always"
-        android:icon="@drawable/ic_action_content_add_box"/>
+        android:icon="@drawable/ic_action_action_alarm_add"/>
 
     <item
         android:id="@+id/action_expand_all"

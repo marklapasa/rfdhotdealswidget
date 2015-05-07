@@ -140,9 +140,12 @@ public class DealWatchRecord extends SugarRecord
         for (int i = 0; i < allRecords.size(); i++)
         {
             DealWatchRecord record = allRecords.get(i);
-            if (record.expiration.getTime() < now.getTime())
+            if (record != null && record.expiration != null)
             {
-                record.delete();
+                if (record.expiration.getTime() < now.getTime())
+                {
+                    record.delete();
+                }
             }
         }
     }
@@ -254,7 +257,15 @@ public class DealWatchRecord extends SugarRecord
 
     public String getExpirationStr()
     {
-        return "Expires " + sdf.format(expiration);
+        if (expiration == null)
+        {
+            return null;
+        }
+        else
+        {
+            return "Expires " + sdf.format(expiration);
+        }
+
     }
 
     public static boolean isExistingFilter(String keywordsText)
