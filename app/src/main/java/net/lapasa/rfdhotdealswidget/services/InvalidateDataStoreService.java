@@ -203,6 +203,7 @@ public class InvalidateDataStoreService extends IntentService
 		{
 			// Display Error msg
 			updateFooter(footerMsg);
+			updateSyncIcon(DealsWidgetProvider.ERROR);
 		}
 
 		// At this point, the service has completed performing it's job. Need to
@@ -214,6 +215,13 @@ public class InvalidateDataStoreService extends IntentService
 		refreshUIintent.setData(Uri.parse(refreshUIintent.toUri(Intent.URI_INTENT_SCHEME)));
 		sendBroadcast(refreshUIintent);
 
+	}
+
+	private void updateSyncIcon(int error)
+	{
+		DealsWidgetProvider.sendPendingIntent(
+				this.getApplicationContext(),
+				DealsWidgetProvider.UPDATE_SYNC_ICON, widgetId, String.valueOf(error));
 	}
 
 	/**

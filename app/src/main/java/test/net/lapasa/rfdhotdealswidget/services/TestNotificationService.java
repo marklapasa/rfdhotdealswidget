@@ -120,7 +120,7 @@ public class TestNotificationService extends AndroidTestCase
         assertEquals(1, notificationService.notificationRecords.size());
 
         NotificationRecord notificationRecord = notificationService.notificationRecords.get(0);
-        List<NotificationNewsItemRecord> notificationNewsItemRecords = notificationRecord.fetchNewsItems();
+        List<NotificationNewsItemRecord> notificationNewsItemRecords = notificationRecord.fetchNewsItemsIds();
         assertEquals(1, notificationNewsItemRecords.size());
 
     }
@@ -183,7 +183,7 @@ public class TestNotificationService extends AndroidTestCase
         assertEquals(1, notificationService.notificationRecords.size());
 
         NotificationRecord notificationRecord = notificationService.notificationRecords.get(0);
-        List<NotificationNewsItemRecord> notificationNewsItemRecords = notificationRecord.fetchNewsItems();
+        List<NotificationNewsItemRecord> notificationNewsItemRecords = notificationRecord.fetchNewsItemsIds();
         assertEquals(2, notificationNewsItemRecords.size());
     }
 

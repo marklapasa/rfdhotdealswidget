@@ -81,6 +81,17 @@
             android:src="@drawable/ic_downloading" />
 
 
+        <ImageButton
+            android:id="@+id/problemIndicator"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:layout_toLeftOf="@id/dealWatchBtn"
+            android:background="@null"
+            android:paddingRight="3dp"
+            android:src="@drawable/ic_download_error"
+            android:visibility="gone"/>
+
         <TextView
             android:id="@+id/bigText"
             android:layout_width="wrap_content"

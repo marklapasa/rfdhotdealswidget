@@ -17,6 +17,11 @@ import java.util.List;
 public class NotificationRecord extends SugarRecord
 {
     public static final String _ID = "id";
+    private DealWatchRecord owner;
+    private String subTitle;
+    private String title;
+    private String body;
+    private String url;
 
     public DealWatchRecord getOwner()
     {
@@ -28,9 +33,16 @@ public class NotificationRecord extends SugarRecord
         this.owner = owner;
     }
 
-    public DealWatchRecord owner;
-    private String title;
-    private String body;
+
+    public String getSubTitle()
+    {
+        return subTitle;
+    }
+
+    public void setSubTitle(String subTitle)
+    {
+        this.subTitle = subTitle;
+    }
 
     public String getUrl()
     {
@@ -42,8 +54,6 @@ public class NotificationRecord extends SugarRecord
         this.url = url;
     }
 
-    private String url;
-
     public NotificationRecord()
     {
         // Required empty constructor
@@ -51,42 +61,69 @@ public class NotificationRecord extends SugarRecord
 
     public static List<NotificationRecord> getAllRecords()
     {
-        return NotificationRecord.find(NotificationRecord.class, null, null);
+        return NotificationRecord.find(NotificationRecord.class, null, new String[]{});
     }
 
     /**
      * Filter news items whose notificationRecords have not been previously persisted
      *
-     * @param list  original list
+     * @param tmpList  original list
      * @return  modified list that removes items that have been previously persisted
      */
-    public List<NewsItem> evaluateDifference(List<NewsItem> list)
+    public List<NewsItem> evaluateDifference(List<NewsItem> tmpList)
     {
         // Fetch all NotificationNewsItems associated to this NotificationRecord
         String whereClause = "owner = ?";
         String[] whereArgs = new String[]{String.valueOf(this.getId())};
 
-        List<NotificationNewsItemRecord> newsItemNotificationRecords = NotificationNewsItemRecord.find(NotificationNewsItemRecord.class, whereClause, null);
+        List<NotificationNewsItemRecord> existingNotificationNewsItemRecords = NotificationNewsItemRecord.find(NotificationNewsItemRecord.class, whereClause, new String[]{});
 
-        // Make note of news items that already exist for this notification
         List<NewsItem> blacklist = new ArrayList<NewsItem>();
-        for (NewsItem newsItem : list)
+        if (existingNotificationNewsItemRecords != null && existingNotificationNewsItemRecords.size() > 0)
         {
-            for (NotificationNewsItemRecord newsItemNotificationRecord : newsItemNotificationRecords)
+            // Make note of news items that already exist for this notification
+
+            for (NewsItem newsItem : tmpList)
             {
-                if (newsItem.getId() == newsItemNotificationRecord.getId())
+                for (NotificationNewsItemRecord newsItemNotificationRecord : existingNotificationNewsItemRecords)
                 {
-                    blacklist.add(newsItem);
+                    // If this holds true, this news item has already been persisted
+                    if (newsItem.getId() == newsItemNotificationRecord.getNewsItemId())
+                    {
+                        blacklist.add(newsItem);
+                        break;
+                    }
+                }
+            }
+        }
+        else
+        {
+            whereClause = "body = ?";
+            String bodyTxt = getBody() == null ? "" : getBody();
+            whereArgs = new String[]{bodyTxt};
+            List<NotificationRecord> existingNotificationRecords = NotificationRecord.find(NotificationRecord.class, whereClause, whereArgs);
+
+            for (NewsItem newsItem : tmpList)
+            {
+                for (NotificationRecord existingNotificationRecord : existingNotificationRecords)
+                {
+                    // If this holds true, this news item has already been persisted
+                    if (newsItem.getBody().equals(existingNotificationRecord.getBody()))
+                    {
+                        blacklist.add(newsItem);
+                        break;
+                    }
                 }
             }
         }
 
         for (NewsItem itemToBeRemoved : blacklist)
         {
-            list.remove(itemToBeRemoved);
+            tmpList.remove(itemToBeRemoved);
         }
 
-        return list;
+        // The remaining news items in this list have not yet been persisted
+        return tmpList;
     }
 
     public String getTitle()
@@ -109,7 +146,7 @@ public class NotificationRecord extends SugarRecord
         this.body = body;
     }
 
-    public List<NotificationNewsItemRecord> fetchNewsItems()
+    public List<NotificationNewsItemRecord> fetchNewsItemsIds()
     {
         String whereClause = "owner = ?";
         String[] whereArgs = new String[]{String.valueOf(getId())};

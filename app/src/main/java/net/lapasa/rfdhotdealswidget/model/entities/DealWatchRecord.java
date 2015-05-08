@@ -73,7 +73,7 @@ public class DealWatchRecord extends SugarRecord
 
     public static List<DealWatchRecord> getAllRecords()
     {
-        return DealWatchRecord.find(DealWatchRecord.class, null, null);
+        return DealWatchRecord.find(DealWatchRecord.class, null, new String[]{});
     }
 
     public static void update(DealWatchRecord record)
@@ -271,7 +271,7 @@ public class DealWatchRecord extends SugarRecord
     public static boolean isExistingFilter(String keywordsText)
     {
         String whereClause = getORClause(keywordsText, new String[]{"keywords"});
-        List<DealWatchRecord> dealWatchRecords = DealWatchRecord.find(DealWatchRecord.class, whereClause, null);
+        List<DealWatchRecord> dealWatchRecords = DealWatchRecord.find(DealWatchRecord.class, whereClause, new String[]{});
         return dealWatchRecords.size() > 0;
     }
 

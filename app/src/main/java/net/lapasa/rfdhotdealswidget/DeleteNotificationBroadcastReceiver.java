@@ -28,7 +28,7 @@ public class DeleteNotificationBroadcastReceiver extends BroadcastReceiver
 
                 if (notificationRecord != null)
                 {
-                    List<NotificationNewsItemRecord> notificationNewsItemRecords = notificationRecord.fetchNewsItems();
+                    List<NotificationNewsItemRecord> notificationNewsItemRecords = notificationRecord.fetchNewsItemsIds();
                     for (NotificationNewsItemRecord newsItem : notificationNewsItemRecords)
                     {
                         newsItem.delete();

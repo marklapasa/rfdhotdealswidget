@@ -13,9 +13,6 @@ import android.widget.ExpandableListView;
 
 import net.lapasa.rfdhotdealswidget.DealWatchActivity;
 import net.lapasa.rfdhotdealswidget.R;
-import net.lapasa.rfdhotdealswidget.dealwatch.commands.CollapseAllCommand;
-import net.lapasa.rfdhotdealswidget.dealwatch.commands.ExpandAllCommand;
-import net.lapasa.rfdhotdealswidget.dealwatch.commands.GroupByEnabledCommand;
 import net.lapasa.rfdhotdealswidget.dealwatch.commands.SortAlphabeticallyCommand;
 import net.lapasa.rfdhotdealswidget.dealwatch.commands.SortByExpirationCommand;
 import net.lapasa.rfdhotdealswidget.model.NewsItemsDTO;
@@ -83,21 +80,21 @@ public class DealWatchListFragment extends Fragment
             case R.id.action_add_filter:
                 launchEditor(null);
                 break;
-            case R.id.action_expand_all:
-                new ExpandAllCommand().execute();
-                break;
-            case R.id.action_collapse_all:
-                new CollapseAllCommand().execute();
-                break;
+//            case R.id.action_expand_all:
+//                new ExpandAllCommand().execute();
+//                break;
+//            case R.id.action_collapse_all:
+//                new CollapseAllCommand().execute();
+//                break;
             case R.id.action_sort_alphabetically:
                 new SortAlphabeticallyCommand().execute();
                 break;
             case R.id.action_sort_by_expiration:
                 new SortByExpirationCommand().execute();
                 break;
-            case R.id.action_group_by_enabled:
-                new GroupByEnabledCommand().execute();
-                break;
+//            case R.id.action_group_by_enabled:
+//                new GroupByEnabledCommand().execute();
+//                break;
             default:
                 return true;
         }

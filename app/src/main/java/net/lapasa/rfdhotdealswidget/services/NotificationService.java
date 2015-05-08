@@ -16,13 +16,6 @@ import java.util.regex.Pattern;
 
 public class NotificationService
 {
-    private Pattern discountPattern = Pattern.compile("\\d+%?");
-
-    public List<DealWatchRecord> getFilters()
-    {
-        return filters;
-    }
-
     public void setFilters(List<DealWatchRecord> filters)
     {
         this.filters.clear();
@@ -32,6 +25,7 @@ public class NotificationService
     private final List<DealWatchRecord> filters = new ArrayList<DealWatchRecord>();
     private final List<NotificationRecord> pendingNotificationRecords;
     private final Context context;
+    public static Pattern discountPattern = Pattern.compile("d+%");
 
     /**
      * A single DealWatchRecord can represent multiple NewsItem records
@@ -39,6 +33,11 @@ public class NotificationService
     private Map<DealWatchRecord, List<NewsItem>> map = new HashMap<DealWatchRecord, List<NewsItem>>();
     public List<NotificationRecord> notificationRecords;
 
+    /**
+     * Constructor
+     *
+     * @param context
+     */
     public NotificationService(Context context)
     {
         this.context = context;
@@ -49,7 +48,7 @@ public class NotificationService
     /**
      * Iterate through each NewsItem and run it through all the DealWatch filters
      *
-     * @param newsItems
+     * @param newsItems Assumption is that these are newsItems that not have been persisted before
      */
     public void runNotifications(List<NewsItem> newsItems)
     {
@@ -72,14 +71,11 @@ public class NotificationService
                         map.put(filter, newsItemValues);
                     }
                     newsItemValues.add(newsItem);
-
-
                 }
             }
         }
 
         // Result: Should have a map whose key = DealWatchRecord maps to a list of NewsItems
-
         if (!map.isEmpty())
         {
             // Iterate through each DealWatchRecord and test for the existance of a NotificationRecord
@@ -93,13 +89,11 @@ public class NotificationService
                     List<NewsItem> difference = notificationRecord.evaluateDifference(list);
                     if (difference.size() > 0)
                     {
+                        // Existing DealWatchRecord maps to brand news NewsItems
                         map.put(key, difference);
                     }
                 }
             }
-
-            // If a persisted record doesn't exist, then create a corresponding NotificationRecord
-            // If it does already exist, check to see if it needs to be updated
 
             generateNewNotificationRecords();
         }
@@ -113,33 +107,28 @@ public class NotificationService
 
     /**
      * In order to genreate a NotificationRecord, you need a DealWatchRecord and at least one NewsItem record
+     * If a persisted record doesn't exist, then create a corresponding NotificationRecord
+     * If it does already exist, check to see if it needs to be updated
      */
     private void generateNewNotificationRecords()
     {
+        // Iterate through each key/DealWatchRecord
         for (DealWatchRecord dealWatchRecord : map.keySet())
         {
+            // Retrieve the list of brand new NewsItems
             List<NewsItem> newsItems = map.get(dealWatchRecord);
+
             if (newsItems.size() == 1)
             {
                 // Create notification that would showcase a single news item
-                NotificationRecord newSingleNotificationRecord = new NotificationRecord();
-                NewsItem singleNewsItem = newsItems.get(0);
-                newSingleNotificationRecord.setTitle(composeTitle(singleNewsItem.getTitle(), dealWatchRecord));
-                newSingleNotificationRecord.setBody(singleNewsItem.getBody());
-                newSingleNotificationRecord.setUrl(singleNewsItem.getUrl());
-                newSingleNotificationRecord.save();
-
-                NotificationNewsItemRecord singleNotificationNewsItemRecord = new NotificationNewsItemRecord();
-                singleNotificationNewsItemRecord.setOwner(newSingleNotificationRecord);
-                singleNotificationNewsItemRecord.setNewsItemId(singleNewsItem.getId());
-                singleNotificationNewsItemRecord.save();
+                generateSingleNotificationData(dealWatchRecord, newsItems.get(0));
             }
             else if (newsItems.size() >= 2)
             {
                 // Create notification data that would reflect multiple records
                 NotificationRecord newMultiNotificationRecord = new NotificationRecord();
                 newMultiNotificationRecord.setTitle(getFormattedTitle(newsItems.size(), dealWatchRecord.keywords)); // "4 deals found for 'ssd'"
-                newMultiNotificationRecord.setBody("Tap to open Deals Watch List");
+                newMultiNotificationRecord.setOwner(dealWatchRecord);
                 newMultiNotificationRecord.save();
 
                 for (NewsItem newsItem : newsItems)
@@ -154,6 +143,22 @@ public class NotificationService
 
         // Launch all archived notification items
         launchNotifications();
+    }
+
+    private void generateSingleNotificationData(DealWatchRecord dealWatchRecord, NewsItem singleNewsItem)
+    {
+        NotificationRecord newSingleNotificationRecord = new NotificationRecord();
+        newSingleNotificationRecord.setTitle(composeTitle(singleNewsItem.getTitle(), dealWatchRecord));
+        newSingleNotificationRecord.setSubTitle(singleNewsItem.getTitle());
+        newSingleNotificationRecord.setBody(singleNewsItem.getBody());
+        newSingleNotificationRecord.setUrl(singleNewsItem.getUrl());
+        newSingleNotificationRecord.setOwner(dealWatchRecord);
+        newSingleNotificationRecord.save();
+
+        NotificationNewsItemRecord singleNotificationNewsItemRecord = new NotificationNewsItemRecord();
+        singleNotificationNewsItemRecord.setOwner(newSingleNotificationRecord);
+        singleNotificationNewsItemRecord.setNewsItemId(singleNewsItem.getId());
+        singleNotificationNewsItemRecord.save();
     }
 
     /**
@@ -198,7 +203,7 @@ public class NotificationService
 
     private void launchNotifications()
     {
-        notificationRecords = NotificationRecord.find(NotificationRecord.class, null, null);
+        notificationRecords = NotificationRecord.find(NotificationRecord.class, null, new String[]{});
         new DispatchNotificationCommand(context, notificationRecords).execute();
 
     }

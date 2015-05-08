@@ -93,7 +93,7 @@ public class Spans
         return sb.toString();
     }
 
-    public String getDisjunctionRegEx(String targetStr)
+    public static String getDisjunctionRegEx(String targetStr)
     {
         String[] terms = prepareStrings(targetStr);
         StringBuilder sb = new StringBuilder();

@@ -1,8 +1,6 @@
 package net.lapasa.rfdhotdealswidget.fragments;
 
-import android.app.AlertDialog;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.DataSetObserver;
@@ -150,13 +148,14 @@ public class DealWatchListAdapter extends BaseExpandableListAdapter implements V
         }
 
 
+/*
         boolean hasOpenedGroup = sharedPreferences.getBoolean(HAS_OPENED_BEFORE, false);
         if (!hasOpenedGroup)
         {
             v.setOnClickListener(new View.OnClickListener()
             {
                 @Override
-                public void onClick(View v)
+                public void onClick(final View v)
                 {
                     AlertDialog.Builder builder = new AlertDialog.Builder(context);
                     builder.setTitle("Tip");
@@ -169,12 +168,14 @@ public class DealWatchListAdapter extends BaseExpandableListAdapter implements V
                             SharedPreferences.Editor editor = sharedPreferences.edit();
                             editor.putBoolean(HAS_OPENED_BEFORE, true);
                             editor.apply();
+                            v.setOnClickListener(null);
                         }
                     });
                     builder.show();
                 }
             });
         }
+*/
 
 
         // Clear
@@ -228,7 +229,7 @@ public class DealWatchListAdapter extends BaseExpandableListAdapter implements V
 
         for (TermSpanRecord termSpanRecord : results)
         {
-            DispatchNotificationCommand.setStyle(sb, termSpanRecord.start, termSpanRecord.end);
+            DispatchNotificationCommand.setStyle(sb, termSpanRecord.start, termSpanRecord.end, DispatchNotificationCommand.HIGHLIGHT);
         }
         return sb.toString();
     }

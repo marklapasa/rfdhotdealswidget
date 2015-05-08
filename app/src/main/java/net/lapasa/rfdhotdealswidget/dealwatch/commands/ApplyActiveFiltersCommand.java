@@ -27,7 +27,7 @@ public class ApplyActiveFiltersCommand implements ICommand
     {
         // Retrive a list of active Filters/DealWatchRecords
         String whereClause = "enabled = true";
-        List<DealWatchRecord> filters = DealWatchRecord.find(DealWatchRecord.class, whereClause, null);
+        List<DealWatchRecord> filters = DealWatchRecord.find(DealWatchRecord.class, whereClause, new String[]{});
 
         for (NewsItem newsItem : newsItems)
         {

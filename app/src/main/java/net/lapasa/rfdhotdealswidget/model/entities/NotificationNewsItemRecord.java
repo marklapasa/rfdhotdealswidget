@@ -9,6 +9,14 @@ import com.orm.dsl.Table;
 @Table(name = "NOTIFICATION_NEWS_ITEM_RECORD")
 public class NotificationNewsItemRecord extends SugarRecord
 {
+    NotificationRecord owner;
+    long newsItemId;
+
+    public NotificationNewsItemRecord()
+    {
+        // Required empty constructor
+    }
+
     public NotificationRecord getOwner()
     {
         return owner;
@@ -19,8 +27,6 @@ public class NotificationNewsItemRecord extends SugarRecord
         this.owner = owner;
     }
 
-    NotificationRecord owner;
-
     public long getNewsItemId()
     {
         return newsItemId;
@@ -30,12 +36,4 @@ public class NotificationNewsItemRecord extends SugarRecord
     {
         this.newsItemId = newsItemId;
     }
-
-    long newsItemId;
-
-    public NotificationNewsItemRecord()
-    {
-        // Required empty constructor
-    }
-
 }

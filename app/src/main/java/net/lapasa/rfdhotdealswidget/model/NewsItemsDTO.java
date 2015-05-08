@@ -268,13 +268,14 @@ public class NewsItemsDTO
 			Log.d(TAG, "Persisting " + newItemsCount + " items for widgetId = " + widgetId);
 
 			open();
-			SQLiteStatement insertStatment = NewsItemSQLHelper.getInsertSQL(database);
+			SQLiteStatement insertStatement = NewsItemSQLHelper.getInsertSQL(database);
 
 			for (NewsItem newsItem : bulkNewsItems)
 			{
-				insertStatment.clearBindings();
+				insertStatement.clearBindings();
 				newsItem.setUnreadFlag(NewsItem.NEW_AND_UNREAD);
-				long insertId = persistNewsItem(insertStatment, newsItem);
+				long insertId = persistNewsItem(insertStatement, newsItem);
+				newsItem.setId(insertId);
 				Log.d(TAG, "News Item Record created, id = " + insertId + " for widgetId = " + newsItem.getWidgetId());
 			}
 			close();
@@ -385,7 +386,7 @@ public class NewsItemsDTO
 	public void removeStale(int widgetId, long threshold)
 	{
 		long now = new Date().getTime();
-		long thresholdDate = now - threshold;
+		long thresholdDate = now - threshold; // Higher number vs. Lower number
 		
 		
 		Log.d(TAG, "Removing stale items for widgetID = " + widgetId);
@@ -405,6 +406,19 @@ public class NewsItemsDTO
 	{
 		open();
 		database.execSQL("delete from " + NewsItemSQLHelper.TABLE_NEWS_ITEMS);
+		close();
+	}
+
+	public NewsItem getById(long newsItemId)
+	{
+		return null;
+	}
+
+	public void deleteAllRecordsForWidget(int appWidgetId)
+	{
+		open();
+		String whereClause = NewsItemSQLHelper.WIDGET_ID + " = " + appWidgetId;
+		database.delete(NewsItemSQLHelper.TABLE_NEWS_ITEMS, whereClause, null);
 		close();
 	}
 }
