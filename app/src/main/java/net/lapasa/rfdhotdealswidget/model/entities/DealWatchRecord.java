@@ -29,10 +29,18 @@ import java.util.Map;
 @Table(name = "DEAL_WATCH_RECORD")
 public class DealWatchRecord extends SugarRecord
 {
+
     static SimpleDateFormat sdf = new SimpleDateFormat("MM/dd/yyyy", Locale.US);
     public static final long FILTER_AND     = 0;
     public static final long FILTER_OR      = 1;
     public static final long FILTER_EXACT   = 2;
+
+//    public static final String SORT_ALPHABETICALLY_ASC = "SORT_ALPHABETICALLY_ASC";
+//    public static final String SORT_EXPIRATION_ASC = "SORT_EXPIRATION_ASC";
+    public static final String SORT_ALPHABETICALLY_ASC = "SORT_ALPHABETICALLY_ASC";
+    public static final String SORT_EXPIRATION_ASC = "SORT_EXPIRATION_ASC";
+    public static final String SORT_ALPHABETICALLY_DESC = "SORT_ALPHABETICALLY_DESC";
+    public static final String SORT_EXPIRATION_DESC = "SORT_EXPIRATION_DESC";
 
     @Ignore
     private static String[] columnNames = new String[]{"title","body"};
@@ -73,13 +81,34 @@ public class DealWatchRecord extends SugarRecord
 
     public static List<DealWatchRecord> getAllRecords()
     {
-        return DealWatchRecord.find(DealWatchRecord.class, null, new String[]{});
+        return getAllRecords(null);
     }
 
-    public static void update(DealWatchRecord record)
+    public static List<DealWatchRecord> getAllRecords(String sortPreference)
     {
-        record.save();
+        String orderBy = null;
+
+        if (SORT_ALPHABETICALLY_ASC.equals(sortPreference))
+        {
+            orderBy = "keywords ASC";
+        }
+        else if (SORT_EXPIRATION_ASC.equals(sortPreference))
+        {
+            orderBy = "expiration ASC";
+        }
+        else if (SORT_ALPHABETICALLY_DESC.equals(sortPreference))
+        {
+            orderBy = "keywords DESC";
+        }
+        else if (SORT_EXPIRATION_DESC.equals(sortPreference))
+        {
+            orderBy = "expiration DESC";
+        }
+
+
+        return DealWatchRecord.find(DealWatchRecord.class, null, new String[]{}, null, orderBy, null);
     }
+
 
     public static void delete(DealWatchRecord record)
     {
@@ -136,7 +165,7 @@ public class DealWatchRecord extends SugarRecord
     public static void purgeExpired()
     {
         Date now = new Date();
-        List<DealWatchRecord> allRecords = getAllRecords();
+        List<DealWatchRecord> allRecords = getAllRecords(null);
         for (int i = 0; i < allRecords.size(); i++)
         {
             DealWatchRecord record = allRecords.get(i);

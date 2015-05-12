@@ -21,7 +21,9 @@
             android:id="@+id/keywords"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:hint="Enter keywords"/>
+            android:hint="Enter keywords"
+            android:textCursorDrawable="@null"
+            android:backgroundTint="@color/red"/>
 
         <!-- Type -->
         <TextView
@@ -33,26 +35,30 @@
         <RadioGroup
             android:id="@+id/typeRadioGroup"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content"
+            android:buttonTint="@color/red">
 
             <RadioButton
                 android:id="@+id/OR_filter"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="OR - Match some keywords"/>
+                android:text="OR - Match some keywords"
+                android:buttonTint="@color/red"/>
 
 
             <RadioButton
                 android:id="@+id/AND_filter"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="AND - Match all keywords"/>
+                android:text="AND - Match all keywords"
+                android:buttonTint="@color/red"/>
 
             <RadioButton
                 android:id="@+id/EXACT_filter"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Exact"/>
+                android:text="Exact"
+                android:buttonTint="@color/red"/>
 
         </RadioGroup>
 
@@ -67,38 +73,45 @@
         <RadioGroup
             android:id="@+id/expirationRadioGroup"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content"
+            android:buttonTint="@color/red">
 
             <RadioButton
                 android:id="@+id/_30days"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="30 Days"/>
+                android:text="30 Days"
+                android:buttonTint="@color/red"/>
 
             <RadioButton
                 android:id="@+id/_90days"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="90 days"/>
+                android:text="90 days"
+                android:buttonTint="@color/red"/>
 
             <RadioButton
                 android:id="@+id/_1year"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="1 Year"/>
+                android:text="1 Year"
+                android:buttonTint="@color/red"/>
 
             <RadioButton
                 android:id="@+id/customDate"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Custom"/>
+                android:text="Custom"
+                android:buttonTint="@color/red"/>
         </RadioGroup>
 
         <DatePicker
             android:id="@+id/customDatePicker"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:visibility="gone"/>
+            android:visibility="gone"
+            android:backgroundTint="@color/red"
+            android:foregroundTint="@color/red"/>
 
     </LinearLayout>
 </ScrollView>

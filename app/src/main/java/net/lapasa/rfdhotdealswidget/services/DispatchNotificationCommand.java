@@ -16,7 +16,7 @@ import android.text.style.ForegroundColorSpan;
 import android.text.style.StyleSpan;
 
 import net.lapasa.rfdhotdealswidget.DealWatchActivity;
-import net.lapasa.rfdhotdealswidget.DeleteNotificationBroadcastReceiver;
+import net.lapasa.rfdhotdealswidget.MarkNotificationAsReadBroadcastReceiver;
 import net.lapasa.rfdhotdealswidget.R;
 import net.lapasa.rfdhotdealswidget.model.NewsItem;
 import net.lapasa.rfdhotdealswidget.model.NewsItemSQLHelper;
@@ -83,6 +83,7 @@ public class DispatchNotificationCommand
                 builder.setNumber(newsItemIds.size());
                 NotificationCompat.InboxStyle inboxStyle = new NotificationCompat.InboxStyle(builder);
                 CharSequence title = newsItemIds.size() + " deals found for \"" + notificationData.getOwner().keywords + "\"";
+                builder.setContentTitle(title);
                 inboxStyle.setBigContentTitle(title);
                 for (int i = 0; i < newsItemIds.size(); i++)
                 {
@@ -98,6 +99,7 @@ public class DispatchNotificationCommand
             }
             else
             {
+                builder.setContentTitle(notificationData.getTitle());
                 NotificationCompat.BigTextStyle bigTextStyle = new NotificationCompat.BigTextStyle(builder);
                 bigTextStyle.setBigContentTitle(notificationData.getTitle());
                 bigTextStyle.bigText(getContentText(notificationData));
@@ -283,50 +285,6 @@ public class DispatchNotificationCommand
         return spannableStr;
     }
 
- /*   private CharSequence getContentTextOLD()
-    {
-        if (notificationRecords.size() == 1)
-        {
-            NotificationRecord notificationRecord = notificationRecords.get(0);
-            List<String> highlightTargets = new ArrayList<>();
-
-            Matcher m = pricePattern.matcher(notificationRecord.getBody());
-
-            while(m.find())
-            {
-                highlightTargets.add(m.group());
-            }
-
-            DealWatchRecord filter = notificationRecord.getOwner();
-        // Prepare notification message body
-        // title + /n + body
-        String[] keywords = Spans.prepareStrings(filter.keywords);
-        List<String> targetStrings = Arrays.asList(keywords);
-
-            List<NotificationNewsItemRecord> notificationNewsItemRecords = notificationRecord.fetchNewsItemsIds();
-            if (notificationNewsItemRecords != null && notificationNewsItemRecords.size() == 1)
-            {
-                NotificationNewsItemRecord loneRecord = notificationNewsItemRecords.get(0);
-                NewsItemsDTO newsItemsDTO = new NewsItemsDTO(context);
-//                newsItemsDTO.;
-//                String baseTxt = loneRecord.getTitle() + "\n" +  singleNewsItem.getBody().substring(0, 140);
-            }
-
-
-
-//        Spannable bodyTxt = DispatchNotificationCommand.highlight(baseTxt, targetStrings);
-
-
-//            return highlight(notificationRecord.getBody(), highlightTargets);
-
-        }
-        else
-        {
-            return "Tap to open Deal Watch List";
-        }
-    }
-
-*/
     public static SpannableString highlight(SpannableString src, List<String> targetStrs)
     {
         for (String targetStr : targetStrs)
@@ -368,8 +326,8 @@ public class DispatchNotificationCommand
      */
     public PendingIntent getDeleteIntent(int notificationId)
     {
-        Intent deleteIntent = new Intent(context, DeleteNotificationBroadcastReceiver.class);
-        deleteIntent.setAction(DeleteNotificationBroadcastReceiver.NOTIFICATION_CANCELLED);
+        Intent deleteIntent = new Intent(context, MarkNotificationAsReadBroadcastReceiver.class);
+        deleteIntent.setAction(MarkNotificationAsReadBroadcastReceiver.NOTIFICATION_READ);
         deleteIntent.putExtra(NotificationRecord._ID, notificationId);
         return PendingIntent.getBroadcast(context, notificationId, deleteIntent, PendingIntent.FLAG_CANCEL_CURRENT);
     }

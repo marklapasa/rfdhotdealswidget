@@ -418,7 +418,7 @@ public class NewsItemsDTO
 	{
 		open();
 		String whereClause = NewsItemSQLHelper.WIDGET_ID + " = " + appWidgetId;
-		database.delete(NewsItemSQLHelper.TABLE_NEWS_ITEMS, whereClause, null);
+		int delete = database.delete(NewsItemSQLHelper.TABLE_NEWS_ITEMS, whereClause, null);
 		close();
 	}
 }

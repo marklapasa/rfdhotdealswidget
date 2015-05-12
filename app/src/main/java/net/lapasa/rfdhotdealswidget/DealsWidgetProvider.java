@@ -34,6 +34,10 @@ import android.widget.RemoteViews;
 import com.androidbook.salbcr.LightedGreenRoom;
 
 import net.lapasa.rfdhotdealswidget.model.NewsItemsDTO;
+import net.lapasa.rfdhotdealswidget.model.entities.DealWatchRecord;
+import net.lapasa.rfdhotdealswidget.model.entities.NotificationNewsItemRecord;
+import net.lapasa.rfdhotdealswidget.model.entities.NotificationRecord;
+import net.lapasa.rfdhotdealswidget.model.entities.TermSpanRecord;
 import net.lapasa.rfdhotdealswidget.services.InvalidateDataStoreService;
 import net.lapasa.rfdhotdealswidget.services.MarkNewsItemReadService;
 import net.lapasa.rfdhotdealswidget.services.RefreshUIService;
@@ -93,7 +97,7 @@ public class DealsWidgetProvider extends AppWidgetProvider
 
 	/**
 	 * Whenever the user selects an item from the list, open the browser and
-	 * mark it as read
+	 * mark it as readFlag
 	 */
 	@Override
 	public void onReceive(Context context, Intent intent)
@@ -158,7 +162,7 @@ public class DealsWidgetProvider extends AppWidgetProvider
 	}
 
 	/**
-	 * Mark the news item as read because the user has touched the row on the list
+	 * Mark the news item as readFlag because the user has touched the row on the list
 	 * then launch a browser window for the link associated to this news item
 	 * 
 	 * @param context
@@ -574,6 +578,22 @@ public class DealsWidgetProvider extends AppWidgetProvider
 			e.printStackTrace();
 		}
 	}
+
+	@Override
+	public void onDisabled(Context context)
+	{
+		NewsItemsDTO newsItemsDTO = new NewsItemsDTO(context);
+		newsItemsDTO.clearAll();
+
+		NotificationRecord.deleteAll(NotificationRecord.class);
+		NotificationNewsItemRecord.deleteAll(NotificationNewsItemRecord.class);
+		DealWatchRecord.deleteAll(DealWatchRecord.class);
+		TermSpanRecord.deleteAll(TermSpanRecord.class);
+
+		super.onDisabled(context);
+	}
+
+
 
 	@Override
 	public void onDeleted(Context context, int[] appWidgetIds)

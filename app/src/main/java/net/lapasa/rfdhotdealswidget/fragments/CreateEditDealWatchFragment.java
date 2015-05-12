@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.v7.app.ActionBarActivity;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -281,7 +282,11 @@ public class CreateEditDealWatchFragment extends Fragment implements DialogInter
     {
         super.onResume();
         int strResId = (isCreateMode) ? R.string.create_filter : R.string.edit_filter;
-        getActivity().setTitle(getActivity().getString(strResId));
+
+        android.support.v7.app.ActionBar supportActionBar = ((ActionBarActivity) getActivity()).getSupportActionBar();
+        supportActionBar.setTitle(strResId);
+        supportActionBar.setSubtitle(null);
+
 
     }
 

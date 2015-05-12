@@ -1,8 +1,10 @@
 package net.lapasa.rfdhotdealswidget.dealwatch.commands;
 
+import net.lapasa.rfdhotdealswidget.fragments.DealWatchListFragment;
+
 public class SortAlphabeticallyCommand implements ICommand
 {
-    public SortAlphabeticallyCommand()
+    public SortAlphabeticallyCommand(DealWatchListFragment dealWatchListFragment)
     {
     }
 

@@ -16,12 +16,15 @@ import java.util.List;
 @Table(name = "NOTIFICATION_RECORD")
 public class NotificationRecord extends SugarRecord
 {
+    public static final long UNREAD = 0L;
+    public static final long READ = 1L;
     public static final String _ID = "id";
     private DealWatchRecord owner;
     private String subTitle;
     private String title;
     private String body;
     private String url;
+    private long readFlag = UNREAD;
 
     public DealWatchRecord getOwner()
     {
@@ -150,7 +153,7 @@ public class NotificationRecord extends SugarRecord
     {
         String whereClause = "owner = ?";
         String[] whereArgs = new String[]{String.valueOf(getId())};
-        return NotificationNewsItemRecord.find(NotificationNewsItemRecord.class, whereClause, whereArgs);
+        return NotificationNewsItemRecord.find(NotificationNewsItemRecord.class, whereClause, whereArgs, null, "owner", null);
     }
 
     public static NotificationRecord getById(long id)
@@ -169,5 +172,45 @@ public class NotificationRecord extends SugarRecord
         {
             return null;
         }
+    }
+
+    public long getReadFlag()
+    {
+        return readFlag;
+    }
+
+    public void setReadFlag(long readFlag)
+    {
+        this.readFlag = readFlag;
+    }
+
+    public static NotificationRecord getByDealWatchRecord(DealWatchRecord dealWatchRecord)
+    {
+
+        String whereClause = "owner = ?";
+        String[] whereArgs = new String[]{String.valueOf(dealWatchRecord.getId())};
+        List<NotificationRecord> notificationRecords = NotificationRecord.find(NotificationRecord.class, whereClause, whereArgs);
+        if (notificationRecords.size() == 1)
+        {
+            return notificationRecords.get(0);
+        }
+        else
+        {
+            return null;
+        }
+    }
+
+    @Override
+    public void delete()
+    {
+        deleteNewsItems();
+        super.delete();
+    }
+
+    public void deleteNewsItems()
+    {
+        String whereClause = "owner = ?";
+        String[] whereArgs = new String[]{String.valueOf(getId())};
+        NotificationNewsItemRecord.deleteAll(NotificationNewsItemRecord.class, whereClause, whereArgs);
     }
 }

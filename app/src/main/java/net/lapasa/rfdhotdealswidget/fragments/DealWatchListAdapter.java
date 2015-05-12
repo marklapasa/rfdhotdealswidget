@@ -26,7 +26,9 @@ import net.lapasa.rfdhotdealswidget.services.DispatchNotificationCommand;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public class DealWatchListAdapter extends BaseExpandableListAdapter implements View.OnClickListener
 {
@@ -46,7 +48,31 @@ public class DealWatchListAdapter extends BaseExpandableListAdapter implements V
     public void addCachedNewsRecords(List<NewsItem> items)
     {
         cachedNewsItems.clear();
-        cachedNewsItems.addAll(items);
+        cachedNewsItems.addAll(deduplicate(items));
+    }
+
+    private List<NewsItem> deduplicate(List<NewsItem> cachedNewsItems)
+    {
+        List<NewsItem> blacklist = new ArrayList<>();
+        Set<String> existingUrls = new HashSet<String>();
+        for (NewsItem newsItem : cachedNewsItems)
+        {
+            if (existingUrls.contains(newsItem.getUrl()))
+            {
+                blacklist.add(newsItem);
+            }
+            else
+            {
+                existingUrls.add(newsItem.getUrl());
+            }
+        }
+
+        for (NewsItem newsItem : blacklist)
+        {
+            cachedNewsItems.remove(newsItem);
+        }
+
+        return cachedNewsItems;
     }
 
     public void setRecords(List<DealWatchRecord> records)
@@ -68,7 +94,7 @@ public class DealWatchListAdapter extends BaseExpandableListAdapter implements V
         DealWatchRecord dealWatchRecord = records.get(groupPosition);
         if (dealWatchRecord == null || dealWatchRecord.filteredNewsItems == null)
         {
-            return 0;
+            dealWatchRecord.filteredNewsItems = dealWatchRecord.filter(cachedNewsItems);
         }
         return dealWatchRecord.filteredNewsItems.size();
     }
@@ -136,7 +162,6 @@ public class DealWatchListAdapter extends BaseExpandableListAdapter implements V
         expirationDate.setText(record.getExpirationStr());
 
         // Count
-
         record.filteredNewsItems = record.filter(cachedNewsItems);
 
         TextView count = (TextView) v.findViewById(R.id.count);

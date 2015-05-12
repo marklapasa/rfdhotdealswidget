@@ -30,11 +30,13 @@
     <!-- Application theme. -->
     <style name="AppTheme" parent="Theme.AppCompat.Light">
         <item name="android:textColor">#ffffffff</item>
+        <item name="android:editTextColor">@color/red</item>
     </style>
 
     <style name="RFDHDActionBar" parent="@style/Widget.AppCompat.Light.ActionBar.Solid.Inverse">
         <item name="android:background"  tools:ignore="NewApi">@color/red</item>
         <item name="background">@color/white</item>
+        <item name="android:textColor">@color/red</item>
     </style>
 
     <style name="rfdhotdeals" parent="Theme.AppCompat.Light">

@@ -49,7 +49,7 @@
                 android:resource="@xml/rfdhotdeals_appwidget_info"/>
         </receiver>
 
-        <receiver android:name=".DeleteNotificationBroadcastReceiver"
+        <receiver android:name=".MarkNotificationAsReadBroadcastReceiver"
                   android:enabled="true">
             <intent-filter>
                 <action android:name="notification_cancelled"/>
@@ -96,7 +96,8 @@
         <activity
             android:name=".DealWatchActivity"
             android:label="@string/title_activity_deal_watch"
-            android:theme="@style/rfdhotdeals">
+            android:theme="@style/rfdhotdeals"
+            android:launchMode="singleInstance">
             <!-- For testing purposes -->
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
