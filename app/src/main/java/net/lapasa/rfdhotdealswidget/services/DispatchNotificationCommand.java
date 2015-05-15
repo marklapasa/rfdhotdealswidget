@@ -77,10 +77,11 @@ public class DispatchNotificationCommand
 //                    .setLargeIcon(bmp);
 
 
-            List<NotificationNewsItemRecord> newsItemIds = notificationData.fetchNewsItemsIds();
+            List<NotificationNewsItemRecord> newsItemIds = notificationData.getRecentNewsItems();
+
             if (newsItemIds != null && newsItemIds.size() > 1)
             {
-                builder.setNumber(newsItemIds.size());
+                builder.setNumber(safeLongToInt(notificationData.getCount()));
                 NotificationCompat.InboxStyle inboxStyle = new NotificationCompat.InboxStyle(builder);
                 CharSequence title = newsItemIds.size() + " deals found for \"" + notificationData.getOwner().keywords + "\"";
                 builder.setContentTitle(title);

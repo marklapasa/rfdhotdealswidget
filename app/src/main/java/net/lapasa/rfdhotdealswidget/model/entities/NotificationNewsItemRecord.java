@@ -9,6 +9,8 @@ import com.orm.dsl.Table;
 @Table(name = "NOTIFICATION_NEWS_ITEM_RECORD")
 public class NotificationNewsItemRecord extends SugarRecord
 {
+
+    String title;
     NotificationRecord owner;
     long newsItemId;
 
@@ -36,4 +38,15 @@ public class NotificationNewsItemRecord extends SugarRecord
     {
         this.newsItemId = newsItemId;
     }
+
+    public String getTitle()
+    {
+        return title;
+    }
+
+    public void setTitle(String title)
+    {
+        this.title = title;
+    }
+
 }

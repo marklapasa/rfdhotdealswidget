@@ -9,8 +9,10 @@ import net.lapasa.rfdhotdealswidget.model.entities.NotificationRecord;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -132,7 +134,7 @@ public class NotificationService
         }
 
         // Launch all archived notification items
-        launchNotifications();
+//        launchNotifications();
     }
 
 
@@ -146,17 +148,109 @@ public class NotificationService
         newMultiNotificationRecord.setReadFlag(NotificationRecord.UNREAD);
         newMultiNotificationRecord.save();
 
+        List<NotificationNewsItemRecord> recentNewsItems = new ArrayList<NotificationNewsItemRecord>();
         for (NewsItem newsItem : newsItems)
         {
             NotificationNewsItemRecord notificationNewsItemRecord = new NotificationNewsItemRecord();
             notificationNewsItemRecord.setOwner(newMultiNotificationRecord);
             notificationNewsItemRecord.setNewsItemId(newsItem.getId());
+            notificationNewsItemRecord.setTitle(newsItem.getTitle());
             notificationNewsItemRecord.save();
+
+            recentNewsItems.add(notificationNewsItemRecord);
         }
+
+
+        newMultiNotificationRecord.setRecentNewsItems(recentNewsItems);
+        dispatch(newMultiNotificationRecord);
     }
 
 
     private void processMultipleNotifications(DealWatchRecord dealWatchRecord, List<NewsItem> newsItems)
+    {
+        // Get the notification record associated to this dealWatchRecord
+        NotificationRecord existingNotification = NotificationRecord.getByDealWatchRecord(dealWatchRecord);
+
+        if (existingNotification != null)
+        {
+            // Update existing notification if necessary
+            // If the existing notification has the same news item, leave it alone and do not generate a new notification
+            if (isNewsItemsTheSame(existingNotification, newsItems))
+            {
+                return;
+            }
+            else
+            {
+                updateExistingNotification(existingNotification, newsItems);
+            }
+        }
+        else
+        {
+            // Create a brand new notification
+            generateMultipleNotifications(dealWatchRecord, newsItems);
+        }
+
+    }
+
+    private void updateExistingNotification(NotificationRecord existingNotification, List<NewsItem> recentNewsItems)
+    {
+        List<NewsItem> blacklist = new ArrayList<>();
+        // Persist recentNewsItems as necessary
+
+        Set<String> existingTitles = new HashSet<String>();
+        List<NotificationNewsItemRecord> allNotificationNewsRecords = NotificationNewsItemRecord.listAll(NotificationNewsItemRecord.class);
+        for (NotificationNewsItemRecord record : allNotificationNewsRecords)
+        {
+            existingTitles.add(record.getTitle());
+        }
+
+        for (NewsItem newsItem : recentNewsItems)
+        {
+            // Check if news item already exists under a notification
+            if (existingTitles.contains(newsItem.getTitle()))
+            {
+                blacklist.add(newsItem);
+            }
+        }
+
+        if (blacklist.size() == recentNewsItems.size())
+        {
+            return;
+        }
+        else
+        {
+            for (NewsItem newsItem : blacklist)
+            {
+                recentNewsItems.remove(newsItem);
+            }
+        }
+
+        existingNotification.setReadFlag(NotificationRecord.UNREAD);
+        existingNotification.setTitle(getFormattedTitle(recentNewsItems.size(), existingNotification.getOwner().keywords)); // "4 deals found for 'ssd'");
+        existingNotification.updateFilterResultsCount();
+
+
+
+        List<NotificationNewsItemRecord> addedNotificationNewsItemRecords = new ArrayList<NotificationNewsItemRecord>();
+        for (NewsItem newsItem : recentNewsItems)
+        {
+            NotificationNewsItemRecord notificationNewsItemRecord = new NotificationNewsItemRecord();
+            notificationNewsItemRecord.setOwner(existingNotification);
+            notificationNewsItemRecord.setNewsItemId(newsItem.getId());
+            notificationNewsItemRecord.setTitle(newsItem.getTitle());
+            notificationNewsItemRecord.save();
+
+            addedNotificationNewsItemRecords.add(notificationNewsItemRecord);
+        }
+
+        existingNotification.setRecentNewsItems(addedNotificationNewsItemRecords);
+        existingNotification.save();
+
+
+        dispatch(existingNotification);
+    }
+
+    private void processMultipleNotificationsOLD(DealWatchRecord dealWatchRecord, List<NewsItem> newsItems)
     {
         // Get the notification record associated to this dealWatchRecord
         NotificationRecord existingNotification = NotificationRecord.getByDealWatchRecord(dealWatchRecord);
@@ -181,8 +275,6 @@ public class NotificationService
                 existingNotification.delete();
                 generateMultipleNotifications(dealWatchRecord, newsItems);
             }
-
-
         }
         else
         {
@@ -210,12 +302,11 @@ public class NotificationService
         if (persistedNewsItemIdSize == newsItemIdsSize)
         {
             // Assumption: Both collections are sorted
-            long[] persistedNewsItemIds = new long[persistedNewsItemIdSize];
-            for (int i = 0; i < persistedNewsItemIds.length; i++)
+            for (int i = 0; i < persistedNewsItemIdSize; i++)
             {
-                long lhs = notificationNewsItemRecords.get(i).getNewsItemId();
-                long rhs = newsItems.get(i).getId();
-                if (lhs != rhs)
+                String lhs =  notificationNewsItemRecords.get(i).getTitle();
+                String rhs = newsItems.get(i).getTitle();
+                if (lhs != null && rhs != null && lhs.equals(rhs))
                 {
                     isSame = false;
                     break;
@@ -291,7 +382,18 @@ public class NotificationService
         NotificationNewsItemRecord singleNotificationNewsItemRecord = new NotificationNewsItemRecord();
         singleNotificationNewsItemRecord.setOwner(newSingleNotificationRecord);
         singleNotificationNewsItemRecord.setNewsItemId(singleNewsItem.getId());
+        singleNotificationNewsItemRecord.setTitle(singleNewsItem.getTitle());
         singleNotificationNewsItemRecord.save();
+
+
+        dispatch(newSingleNotificationRecord);
+    }
+
+    private void dispatch(NotificationRecord record)
+    {
+        List<NotificationRecord> queue = new ArrayList<NotificationRecord>();
+        queue.add(record);
+        new DispatchNotificationCommand(context, queue).execute();
     }
 
     /**
@@ -304,7 +406,9 @@ public class NotificationService
      */
     private String composeTitle(String title, DealWatchRecord dealWatchRecord)
     {
-        String newTitle = title;
+        String keywordStr = "\"" + dealWatchRecord.keywords + "\"";
+
+        String newTitle = "Latest deal on " + keywordStr;
         // Primary - Is there a dollar amount
         Matcher m = DispatchNotificationCommand.pricePattern.matcher(title);
         List<String> amts = new ArrayList<>();
@@ -315,7 +419,8 @@ public class NotificationService
 
         if (amts.size() > 0)
         {
-            newTitle = "\"" + dealWatchRecord.keywords + "\" for " + amts.get(0);
+
+            newTitle = keywordStr + " for " + amts.get(0);
         }
         else
         {
@@ -327,20 +432,10 @@ public class NotificationService
             }
             if (amts.size() > 0)
             {
-                newTitle = "\"" + dealWatchRecord.keywords + "\" at " + amts.get(0) + " off";
+                newTitle = keywordStr + " at " + amts.get(0) + " off";
             }
         }
 
         return newTitle;
     }
-
-    private void launchNotifications()
-    {
-        String whereClause = "read_flag = ?";
-        String[] whereArgs = new String[]{String.valueOf(NotificationRecord.UNREAD)};
-        notificationRecords = NotificationRecord.find(NotificationRecord.class, whereClause, whereArgs);
-        new DispatchNotificationCommand(context, notificationRecords).execute();
-
-    }
-
 }

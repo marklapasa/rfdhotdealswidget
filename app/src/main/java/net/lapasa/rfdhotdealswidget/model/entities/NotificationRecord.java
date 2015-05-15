@@ -2,6 +2,7 @@ package net.lapasa.rfdhotdealswidget.model.entities;
 
 
 import com.orm.SugarRecord;
+import com.orm.dsl.Ignore;
 import com.orm.dsl.Table;
 
 import net.lapasa.rfdhotdealswidget.model.NewsItem;
@@ -18,13 +19,54 @@ public class NotificationRecord extends SugarRecord
 {
     public static final long UNREAD = 0L;
     public static final long READ = 1L;
+    private long readFlag = UNREAD;
     public static final String _ID = "id";
     private DealWatchRecord owner;
     private String subTitle;
     private String title;
     private String body;
     private String url;
-    private long readFlag = UNREAD;
+    private long count;
+
+    public long getCount()
+    {
+        return count;
+    }
+
+    public void setCount(long count)
+    {
+        this.count = count;
+    }
+
+
+
+    @Ignore
+    List<NotificationNewsItemRecord> recentNewsItems;
+
+
+
+
+
+
+
+
+
+    public List<NotificationNewsItemRecord> getRecentNewsItems()
+    {
+        return recentNewsItems;
+    }
+
+    public void setRecentNewsItems(List<NotificationNewsItemRecord> recentNewsItems)
+    {
+        this.recentNewsItems = recentNewsItems;
+    }
+
+
+
+
+
+
+
 
     public DealWatchRecord getOwner()
     {
@@ -91,7 +133,7 @@ public class NotificationRecord extends SugarRecord
                 for (NotificationNewsItemRecord newsItemNotificationRecord : existingNotificationNewsItemRecords)
                 {
                     // If this holds true, this news item has already been persisted
-                    if (newsItem.getId() == newsItemNotificationRecord.getNewsItemId())
+                    if (newsItem.getTitle().equals(newsItemNotificationRecord.getTitle()))
                     {
                         blacklist.add(newsItem);
                         break;
@@ -212,5 +254,12 @@ public class NotificationRecord extends SugarRecord
         String whereClause = "owner = ?";
         String[] whereArgs = new String[]{String.valueOf(getId())};
         NotificationNewsItemRecord.deleteAll(NotificationNewsItemRecord.class, whereClause, whereArgs);
+    }
+
+    public void updateFilterResultsCount()
+    {
+        String whereClause = "owner = ?";
+        String[] whereArgs = new String[]{String.valueOf(owner.getId())};
+        setCount(NotificationNewsItemRecord.count(NotificationNewsItemRecord.class, whereClause, whereArgs));
     }
 }

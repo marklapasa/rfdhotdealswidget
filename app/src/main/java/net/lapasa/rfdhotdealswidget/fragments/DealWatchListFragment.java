@@ -2,9 +2,10 @@ package net.lapasa.rfdhotdealswidget.fragments;
 
 import android.app.Fragment;
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
+import android.net.Uri;
 import android.os.Bundle;
-import android.support.v7.app.ActionBarActivity;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -16,6 +17,7 @@ import android.widget.ExpandableListView;
 
 import net.lapasa.rfdhotdealswidget.DealWatchActivity;
 import net.lapasa.rfdhotdealswidget.R;
+import net.lapasa.rfdhotdealswidget.model.NewsItem;
 import net.lapasa.rfdhotdealswidget.model.NewsItemsDTO;
 import net.lapasa.rfdhotdealswidget.model.entities.DealWatchRecord;
 
@@ -30,6 +32,7 @@ public class DealWatchListFragment extends Fragment
     private boolean hasOpenedGroup;
     private NewsItemsDTO newsItemDTO;
     private String sortPreference = DealWatchRecord.SORT_ALPHABETICALLY_ASC;
+    private DealWatchActivity activity;
 
     public DealWatchListFragment()
     {
@@ -75,6 +78,24 @@ public class DealWatchListFragment extends Fragment
                     expandibleListView.collapseGroup(lastExpandedPosition);
                 }
                 lastExpandedPosition = groupPosition;
+            }
+        });
+
+
+        expandibleListView.setOnChildClickListener(new ExpandableListView.OnChildClickListener()
+        {
+            @Override
+            public boolean onChildClick(ExpandableListView parent, View v, int groupPosition, int childPosition, long id)
+            {
+                DealWatchRecord record = (DealWatchRecord) adapter.getGroup(groupPosition);
+                NewsItem newsItem = record.filteredNewsItems.get(childPosition);
+
+                String targetUrl = newsItem.getUrl();
+                Intent i = new Intent(Intent.ACTION_VIEW);
+                i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                i.setData(Uri.parse(targetUrl));
+                activity.startActivity(i);
+                return true;
             }
         });
 
@@ -141,7 +162,7 @@ public class DealWatchListFragment extends Fragment
     private void rememberSortPreference(String targetPref)
     {
         sortPreference = targetPref;
-        SharedPreferences sharedPreferences = getActivity().getSharedPreferences(DealWatchListFragment.class.getName(), Context.MODE_PRIVATE);
+        SharedPreferences sharedPreferences = activity.getSharedPreferences(DealWatchListFragment.class.getName(), Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPreferences.edit();
         editor.putString(SORT_PREFERENCE, sortPreference);
         editor.apply();
@@ -157,7 +178,7 @@ public class DealWatchListFragment extends Fragment
             bundle.putLong(CreateEditDealWatchFragment.EXISTING_RECORD_ID, record.getId());
             frag.setArguments(bundle);
         }
-        ((DealWatchActivity) getActivity()).launchFragment(frag);
+        activity.launchFragment(frag);
     }
 
     @Override
@@ -170,14 +191,27 @@ public class DealWatchListFragment extends Fragment
     private void refresh()
     {
 
-        android.support.v7.app.ActionBar supportActionBar = ((ActionBarActivity) getActivity()).getSupportActionBar();
-        supportActionBar.setTitle(getActivity().getString(R.string.deal_watch));
-        supportActionBar.setSubtitle(getActivity().getString(R.string.sub_title));
+        activity = (DealWatchActivity) getActivity();
+        activity.enableLoadingAnimation(true);
+
+        android.support.v7.app.ActionBar supportActionBar = activity.getSupportActionBar();
+        supportActionBar.setTitle(activity.getString(R.string.deal_watch));
+        supportActionBar.setSubtitle(activity.getString(R.string.sub_title));
+
 
         if (adapter == null)
         {
             adapter = new DealWatchListAdapter(getActivity());
         }
+
+        if (newsItemDTO == null)
+        {
+            newsItemDTO = new NewsItemsDTO(getActivity());
+        }
+
+        // Inject to the adapter the most up to date news item records
+        adapter.addCachedNewsRecords(newsItemDTO.find(null));
+
 
         recallSortPreference();
         adapter.setRecords(DealWatchRecord.getAllRecords(sortPreference));
@@ -187,7 +221,7 @@ public class DealWatchListFragment extends Fragment
         {
             newsItemDTO = new NewsItemsDTO(getActivity());
         }
-        adapter.addCachedNewsRecords(newsItemDTO.find(null));
+
 
         expandibleListView.setAdapter(adapter);
 
@@ -199,11 +233,13 @@ public class DealWatchListFragment extends Fragment
                 openById(targetDealWatchToBeOpened);
             }
         }
+
+        activity.enableLoadingAnimation(false);
     }
 
     private void recallSortPreference()
     {
-        SharedPreferences sharedPreferences = getActivity().getSharedPreferences(DealWatchListFragment.class.getName(), Context.MODE_PRIVATE);
+        SharedPreferences sharedPreferences = activity.getSharedPreferences(DealWatchListFragment.class.getName(), Context.MODE_PRIVATE);
         sortPreference = sharedPreferences.getString(SORT_PREFERENCE, DealWatchRecord.SORT_ALPHABETICALLY_ASC);
     }
 

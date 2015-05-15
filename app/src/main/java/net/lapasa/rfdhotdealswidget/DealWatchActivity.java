@@ -1,8 +1,10 @@
 package net.lapasa.rfdhotdealswidget;
 
+import android.app.AlertDialog;
 import android.app.Fragment;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
+import android.app.ProgressDialog;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
 
@@ -14,6 +16,7 @@ public class DealWatchActivity extends ActionBarActivity
 {
 
     public static final String RECORD_ID = "RECORD_ID";
+    private AlertDialog loadingDialog;
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -33,6 +36,9 @@ public class DealWatchActivity extends ActionBarActivity
         }
 
         launchFragment(frag);
+        getSupportActionBar().setDisplayShowHomeEnabled(true);
+        getSupportActionBar().setDisplayUseLogoEnabled(true);
+        getSupportActionBar().setLogo(R.drawable.ic_launcher);
     }
 
     public void launchFragment(Fragment fragment)
@@ -68,5 +74,25 @@ public class DealWatchActivity extends ActionBarActivity
         getActionBar().setTitle(title);
     }
 
+
+
+    public void enableLoadingAnimation(boolean b)
+    {
+        if (loadingDialog == null)
+        {
+            ProgressDialog.Builder builder = new ProgressDialog.Builder(this);
+            builder.setTitle("Please wait");
+            loadingDialog = builder.create();
+        }
+
+        if (b)
+        {
+            loadingDialog.show();
+        }
+        else
+        {
+            loadingDialog.hide();
+        }
+    }
 
 }

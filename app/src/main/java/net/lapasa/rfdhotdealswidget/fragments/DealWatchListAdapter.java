@@ -1,12 +1,9 @@
 package net.lapasa.rfdhotdealswidget.fragments;
 
 import android.content.Context;
-import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.DataSetObserver;
 import android.graphics.Bitmap;
-import android.net.Uri;
-import android.text.InputFilter;
 import android.text.Spannable;
 import android.text.SpannableString;
 import android.view.View;
@@ -30,7 +27,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-public class DealWatchListAdapter extends BaseExpandableListAdapter implements View.OnClickListener
+public class DealWatchListAdapter extends BaseExpandableListAdapter
 {
     private static final String HAS_OPENED_BEFORE = "firstExpansion";
     private int targetLayoutId = Utils.getNewsItemLayout();
@@ -38,6 +35,7 @@ public class DealWatchListAdapter extends BaseExpandableListAdapter implements V
     List<DealWatchRecord> records;
     private List<NewsItem> cachedNewsItems = new ArrayList<NewsItem>();
     final SharedPreferences sharedPreferences;
+
     public DealWatchListAdapter(Context context)
     {
         this.records = new ArrayList<DealWatchRecord>();
@@ -51,6 +49,11 @@ public class DealWatchListAdapter extends BaseExpandableListAdapter implements V
         cachedNewsItems.addAll(deduplicate(items));
     }
 
+    /**
+     * This is required because it's possible to have multiple widgets. Normalize this to a unique set of news items
+     * @param cachedNewsItems
+     * @return
+     */
     private List<NewsItem> deduplicate(List<NewsItem> cachedNewsItems)
     {
         List<NewsItem> blacklist = new ArrayList<>();
@@ -75,10 +78,19 @@ public class DealWatchListAdapter extends BaseExpandableListAdapter implements V
         return cachedNewsItems;
     }
 
+
+    /**
+     * A DealWatchAdapter displays a list of DealWatchRecords
+     * @param records
+     */
     public void setRecords(List<DealWatchRecord> records)
     {
         this.records.clear();
         this.records.addAll(records);
+
+        // TODO: Take the cached news item records and assign them to each of the DealWatchRecords
+
+
         notifyDataSetInvalidated();
     }
 
@@ -211,6 +223,7 @@ public class DealWatchListAdapter extends BaseExpandableListAdapter implements V
     public View getChildView(int groupPosition, int childPosition, boolean isLastChild, View convertView, ViewGroup parent)
     {
         DealWatchRecord record = records.get(groupPosition);
+
         NewsItem newsItem = record.filteredNewsItems.get(childPosition);
 
         // List row item layout
@@ -228,21 +241,17 @@ public class DealWatchListAdapter extends BaseExpandableListAdapter implements V
         bodyTextView.setText(null);
         dateTextView.setText(null);
 
-        String formattedTitle = applySpans(newsItem.getTitle(), record.getResults());
+        String formattedTitle = newsItem.getTitle(); //applySpans(newsItem.getTitle(), record.getResults());
         titleTextView.setText(formattedTitle);
         bodyTextView.setMaxLines(1000);
-        bodyTextView.setFilters(new InputFilter[]{});
+//        bodyTextView.setFilters(new InputFilter[]{});
         bodyTextView.setText(newsItem.getBody());
         dateTextView.setText(newsItem.getFormattedDate(context));
 
         if (targetLayoutId == R.layout.news_item)
         {
-            setThumbnailOnNewsItem(newsItem.getThumbnail(), (ImageView) v.findViewById(R.id.image));
+//            setThumbnailOnNewsItem(newsItem.getThumbnail(), (ImageView) v.findViewById(R.id.image));
         }
-
-        // Data for when the user clicks on this row
-        v.setTag(newsItem);
-        v.setOnClickListener(this);
 
         // Clear
         return v;
@@ -295,19 +304,5 @@ public class DealWatchListAdapter extends BaseExpandableListAdapter implements V
     {
         super.registerDataSetObserver(observer);
     }
-
-    // Called when the user clicks on a child view
-    @Override
-    public void onClick(View v)
-    {
-        NewsItem newsItem = (NewsItem) v.getTag();
-
-        String targetUrl = newsItem.getUrl();
-        Intent i = new Intent(Intent.ACTION_VIEW);
-        i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        i.setData(Uri.parse(targetUrl));
-        context.startActivity(i);
-    }
-
 
 }

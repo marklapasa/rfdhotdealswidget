@@ -23,7 +23,9 @@
             android:layout_height="match_parent"
             android:hint="Enter keywords"
             android:textCursorDrawable="@null"
-            android:backgroundTint="@color/red"/>
+            android:backgroundTint="@color/red">
+            <requestFocus/>
+        </EditText>
 
         <!-- Type -->
         <TextView
