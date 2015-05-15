@@ -5,6 +5,7 @@ import android.app.Fragment;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
 import android.app.ProgressDialog;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
 
@@ -17,6 +18,7 @@ public class DealWatchActivity extends ActionBarActivity
 
     public static final String RECORD_ID = "RECORD_ID";
     private AlertDialog loadingDialog;
+    private DealWatchListFragment frag;
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -26,14 +28,8 @@ public class DealWatchActivity extends ActionBarActivity
         setContentView(R.layout.activity_deal_watch);
         DealWatchRecord.purgeExpired();
 
-        Fragment frag = new DealWatchListFragment();
-        long existingDealWatchFilterId = getIntent().getLongExtra(DealWatchActivity.RECORD_ID, -1L);
-        if (existingDealWatchFilterId >= 0)
-        {
-            Bundle bundle = new Bundle();
-            bundle.putLong(DealWatchActivity.RECORD_ID, existingDealWatchFilterId);
-            frag.setArguments(bundle);
-        }
+        frag = new DealWatchListFragment();
+
 
         launchFragment(frag);
         getSupportActionBar().setDisplayShowHomeEnabled(true);
@@ -95,4 +91,14 @@ public class DealWatchActivity extends ActionBarActivity
         }
     }
 
+    @Override
+    protected void onNewIntent(Intent intent)
+    {
+        super.onNewIntent(intent);
+        long targetRecord = intent.getLongExtra(RECORD_ID, -1L);
+        if (frag != null)
+        {
+            frag.openById(targetRecord);
+        }
+    }
 }

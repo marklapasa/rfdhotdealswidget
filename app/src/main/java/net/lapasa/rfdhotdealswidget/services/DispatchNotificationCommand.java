@@ -200,8 +200,8 @@ public class DispatchNotificationCommand
         if (notificationNewsItemRecords.size() == 1)
         {
             String url = notificationData.getUrl();
-            resultIntent = new Intent(Intent.ACTION_VIEW);
-            resultIntent.setData(Uri.parse(url));
+            resultIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
+            return PendingIntent.getActivity(context, 0, resultIntent, 0);
         }
         else
         {
@@ -209,9 +209,10 @@ public class DispatchNotificationCommand
             long id = notificationData.getOwner().getId();
             resultIntent = new Intent(context, DealWatchActivity.class);
             resultIntent.putExtra(DealWatchActivity.RECORD_ID, id);
+            return PendingIntent.getActivity(context, 0, resultIntent, PendingIntent.FLAG_UPDATE_CURRENT);
         }
 
-        return PendingIntent.getActivity(context, 0, resultIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+
     }
 
 

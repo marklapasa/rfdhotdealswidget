@@ -104,7 +104,7 @@ public class DealWatchListAdapter extends BaseExpandableListAdapter
     public int getChildrenCount(int groupPosition)
     {
         DealWatchRecord dealWatchRecord = records.get(groupPosition);
-        if (dealWatchRecord == null || dealWatchRecord.filteredNewsItems == null)
+        if (dealWatchRecord == null || dealWatchRecord.filteredNewsItems == null || dealWatchRecord.filteredNewsItems.size() == 0)
         {
             dealWatchRecord.filteredNewsItems = dealWatchRecord.filter(cachedNewsItems);
         }

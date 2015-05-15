@@ -225,14 +225,6 @@ public class DealWatchListFragment extends Fragment
 
         expandibleListView.setAdapter(adapter);
 
-        if (getArguments() != null)
-        {
-            long targetDealWatchToBeOpened = getArguments().getLong(DealWatchActivity.RECORD_ID, -1L);
-            if (targetDealWatchToBeOpened >= 0)
-            {
-                openById(targetDealWatchToBeOpened);
-            }
-        }
 
         activity.enableLoadingAnimation(false);
     }
@@ -253,6 +245,7 @@ public class DealWatchListFragment extends Fragment
 
     public void openById(long targetDealWatchToBeOpened)
     {
+        refresh();
         // Figure out index of DealWatchFilter record that has this id
         int targetIndex = -1;
         for (int i = 0; i < adapter.getGroupCount(); i++)
@@ -267,7 +260,21 @@ public class DealWatchListFragment extends Fragment
 
         if (targetIndex >= 0)
         {
-            expandibleListView.expandGroup(targetIndex, true);
+
+            final int _targetIndex = targetIndex;
+
+            adapter.getChildrenCount(targetIndex); // This will trigger fetching the data for the child views
+            android.os.Handler h = new android.os.Handler();
+            h.postDelayed(new Runnable()
+            {
+                @Override
+                public void run()
+                {
+                    expandibleListView.setSelection(_targetIndex);
+                    expandibleListView.expandGroup(_targetIndex);
+                }
+            }, 1000);
+
         }
     }
     /**
