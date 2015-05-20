@@ -9,7 +9,6 @@ import net.lapasa.rfdhotdealswidget.model.entities.NotificationRecord;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -28,6 +27,7 @@ public class NotificationService
     private final List<NotificationRecord> pendingNotificationRecords;
     private final Context context;
     public static Pattern discountPattern = Pattern.compile("d+%");
+    private NotificationRecord notificationRecord;
 
     public void setFilters(List<DealWatchRecord> filters)
     {
@@ -56,10 +56,12 @@ public class NotificationService
      */
     public void runNotifications(List<NewsItem> newsItems)
     {
+        // Pull in all available Deal Watch Records
         setFilters(DealWatchRecord.getAllRecords());
 
         for (NewsItem newsItem : newsItems)
         {
+            // Evaluate how what news items belong with a deal watch filter
             // For each NewsItem, run it through the filters
             for (DealWatchRecord filter : filters)
             {
@@ -93,7 +95,7 @@ public class NotificationService
                     List<NewsItem> difference = notificationRecord.evaluateDifference(list);
                     if (difference.size() > 0)
                     {
-                        // Existing DealWatchRecord maps to brand news NewsItems
+                        // Existing DealWatchRecord maps to brand new NewsItems
                         map.put(key, difference);
                     }
                 }
@@ -109,221 +111,134 @@ public class NotificationService
         return String.valueOf(size) + " deals found for \"" + keywords + "\"";
     }
 
-    /**
-     * In order to generate a NotificationRecord, you need a DealWatchRecord and at least one NewsItem record
-     * If a persisted record doesn't exist, then create a corresponding NotificationRecord
-     * If it does already exist, check to see if it needs to be updated
-     */
     private void generateNewNotificationRecords()
     {
-        // Iterate through each DealWatchRecord (key)
-        for (DealWatchRecord dealWatchRecord : map.keySet())
+        Set<DealWatchRecord> dealWatchRecords = map.keySet();
+        if(dealWatchRecords.size() == 1)
         {
-            // Retrieve the list of brand new NewsItems (value)
-            List<NewsItem> newsItems = map.get(dealWatchRecord);
+            DealWatchRecord[] oneItemArray = new DealWatchRecord[1];
+            dealWatchRecords.toArray(oneItemArray);
+            DealWatchRecord dealWatchRecord = oneItemArray[0];
 
+            List<NewsItem> newsItems = map.get(dealWatchRecord);
             if (newsItems.size() == 1)
             {
-                // Create notification that would showcase a single news item
+                // Scenario 1: One Deal Watch Record match to 1 News Item Record
                 processSingleNotification(dealWatchRecord, newsItems.get(0));
             }
-            else if (newsItems.size() >= 2)
+            else
             {
-                processMultipleNotifications(dealWatchRecord, newsItems);
+                // Scenario 2: One Deal Watch Record matches many News Item Records
+                processDealDigestNotification();
             }
         }
+        else if (dealWatchRecords.size() > 1)
+        {
+            // Scenario 3: Many Deal Watch Records matches many News Item Records
+            // Scenario 4: Many Deal Watch Records matches one News Item Record
+            processDealDigestNotification();
+        }
 
-        // Launch all archived notification items
-//        launchNotifications();
+
+        if (notificationRecord != null)
+        {
+            new DispatchNotificationCommand(context, notificationRecord).execute();
+        }
     }
 
 
-    private void generateMultipleNotifications(DealWatchRecord dealWatchRecord, List<NewsItem> newsItems)
+    /**
+     * Create a single Notification that represents multiple DealWatch and NewsItem records
+     */
+    private void processDealDigestNotification()
     {
-        // Create notification data that would reflect multiple records
-        NotificationRecord newMultiNotificationRecord = new NotificationRecord();
-        newMultiNotificationRecord.setId(dealWatchRecord.getId());
-        newMultiNotificationRecord.setTitle(getFormattedTitle(newsItems.size(), dealWatchRecord.keywords)); // "4 deals found for 'ssd'"
-        newMultiNotificationRecord.setOwner(dealWatchRecord);
-        newMultiNotificationRecord.setReadFlag(NotificationRecord.UNREAD);
-        newMultiNotificationRecord.save();
+        NotificationRecord mergedRecord = new NotificationRecord();
+        mergedRecord.save();
 
+        // Set title - 42 deals found for "a", "b", and "c"
+        StringBuilder keywordsSuffixStringBuilder = new StringBuilder();
+        int dealSum = 0;
+        int loopCounter = 0;
+
+        int size = map.keySet().size();
+        for (DealWatchRecord dealWatchRecord : map.keySet())
+        {
+
+            List<NewsItem> newsItems = map.get(dealWatchRecord);
+
+            // Append to deal digest
+            dealSum += newsItems.size();
+            createNotificationNewsItems(mergedRecord, dealWatchRecord, newsItems);
+
+            keywordsSuffixStringBuilder.append("\"" + dealWatchRecord.keywords + "\"");
+
+            if (size != 1)
+            {
+                if (size == 2)
+                {
+                    if (loopCounter == 0)
+                    {
+                        keywordsSuffixStringBuilder.append(" and ");
+                    }
+                }
+                else if (loopCounter < size)
+                {
+                    keywordsSuffixStringBuilder.append(", ");
+
+                    if (loopCounter == size - 2)
+                    {
+                        keywordsSuffixStringBuilder.append("and ");
+                    }
+                }
+            }
+            else
+            {
+                mergedRecord.setOwner(dealWatchRecord);
+            }
+
+            loopCounter++;
+
+        }
+
+        mergedRecord.setTitle(dealSum + " deals found for " + keywordsSuffixStringBuilder.toString());
+        mergedRecord.setBody("Tap and drag to expand");
+        mergedRecord.save();
+
+        notificationRecord = mergedRecord;
+    }
+
+    /**
+     * Append DealWatchRecord and NewsItemRecords in to this one notification
+     *
+     * @param mergedRecord
+     * @param dealWatchRecord
+     * @param newsItems
+     */
+    private void createNotificationNewsItems(NotificationRecord mergedRecord, DealWatchRecord dealWatchRecord, List<NewsItem> newsItems)
+    {
         List<NotificationNewsItemRecord> recentNewsItems = new ArrayList<NotificationNewsItemRecord>();
+
         for (NewsItem newsItem : newsItems)
         {
             NotificationNewsItemRecord notificationNewsItemRecord = new NotificationNewsItemRecord();
-            notificationNewsItemRecord.setOwner(newMultiNotificationRecord);
+            notificationNewsItemRecord.setOwner(mergedRecord);
             notificationNewsItemRecord.setNewsItemId(newsItem.getId());
             notificationNewsItemRecord.setTitle(newsItem.getTitle());
+            notificationNewsItemRecord.setBody(newsItem.getBody());
+            notificationNewsItemRecord.setKeywords(dealWatchRecord.keywords);
             notificationNewsItemRecord.save();
 
             recentNewsItems.add(notificationNewsItemRecord);
         }
+        mergedRecord.setRecentNewsItems(recentNewsItems);
 
 
-        newMultiNotificationRecord.setRecentNewsItems(recentNewsItems);
-        dispatch(newMultiNotificationRecord);
-    }
-
-
-    private void processMultipleNotifications(DealWatchRecord dealWatchRecord, List<NewsItem> newsItems)
-    {
-        // Get the notification record associated to this dealWatchRecord
-        NotificationRecord existingNotification = NotificationRecord.getByDealWatchRecord(dealWatchRecord);
-
-        if (existingNotification != null)
-        {
-            // Update existing notification if necessary
-            // If the existing notification has the same news item, leave it alone and do not generate a new notification
-            if (isNewsItemsTheSame(existingNotification, newsItems))
-            {
-                return;
-            }
-            else
-            {
-                updateExistingNotification(existingNotification, newsItems);
-            }
-        }
-        else
-        {
-            // Create a brand new notification
-            generateMultipleNotifications(dealWatchRecord, newsItems);
-        }
-
-    }
-
-    private void updateExistingNotification(NotificationRecord existingNotification, List<NewsItem> recentNewsItems)
-    {
-        List<NewsItem> blacklist = new ArrayList<>();
-        // Persist recentNewsItems as necessary
-
-        Set<String> existingTitles = new HashSet<String>();
-        List<NotificationNewsItemRecord> allNotificationNewsRecords = NotificationNewsItemRecord.listAll(NotificationNewsItemRecord.class);
-        for (NotificationNewsItemRecord record : allNotificationNewsRecords)
-        {
-            existingTitles.add(record.getTitle());
-        }
-
-        for (NewsItem newsItem : recentNewsItems)
-        {
-            // Check if news item already exists under a notification
-            if (existingTitles.contains(newsItem.getTitle()))
-            {
-                blacklist.add(newsItem);
-            }
-        }
-
-        if (blacklist.size() == recentNewsItems.size())
-        {
-            return;
-        }
-        else
-        {
-            for (NewsItem newsItem : blacklist)
-            {
-                recentNewsItems.remove(newsItem);
-            }
-        }
-
-        existingNotification.setReadFlag(NotificationRecord.UNREAD);
-        existingNotification.setTitle(getFormattedTitle(recentNewsItems.size(), existingNotification.getOwner().keywords)); // "4 deals found for 'ssd'");
-        existingNotification.updateFilterResultsCount();
-
-
-
-        List<NotificationNewsItemRecord> addedNotificationNewsItemRecords = new ArrayList<NotificationNewsItemRecord>();
-        for (NewsItem newsItem : recentNewsItems)
-        {
-            NotificationNewsItemRecord notificationNewsItemRecord = new NotificationNewsItemRecord();
-            notificationNewsItemRecord.setOwner(existingNotification);
-            notificationNewsItemRecord.setNewsItemId(newsItem.getId());
-            notificationNewsItemRecord.setTitle(newsItem.getTitle());
-            notificationNewsItemRecord.save();
-
-            addedNotificationNewsItemRecords.add(notificationNewsItemRecord);
-        }
-
-        existingNotification.setRecentNewsItems(addedNotificationNewsItemRecords);
-        existingNotification.save();
-
-
-        dispatch(existingNotification);
-    }
-
-    private void processMultipleNotificationsOLD(DealWatchRecord dealWatchRecord, List<NewsItem> newsItems)
-    {
-        // Get the notification record associated to this dealWatchRecord
-        NotificationRecord existingNotification = NotificationRecord.getByDealWatchRecord(dealWatchRecord);
-
-        if (existingNotification != null)
-        {
-
-            if (existingNotification.getReadFlag() == NotificationRecord.READ)
-            {
-                existingNotification.setReadFlag(NotificationRecord.UNREAD);
-                existingNotification.save();
-            }
-
-            // If the existing notification has the same news item, leave it alone and do not generate a new notification
-            if (isNewsItemsTheSame(existingNotification, newsItems))
-            {
-                return;
-            }
-            else
-            {
-                // If the unread notification has a different news item, delete the existing and generate a new notification as the replacement
-                existingNotification.delete();
-                generateMultipleNotifications(dealWatchRecord, newsItems);
-            }
-        }
-        else
-        {
-            // Create a brand new notification
-            generateMultipleNotifications(dealWatchRecord, newsItems);
-        }
-    }
-
-    /**
-     * Return true if the News items in associated to the notification are the same as the ones
-     * provided in the newsItems parameter
-     *
-     * @param notificationRecord
-     * @param newsItems
-     * @return
-     */
-    private boolean isNewsItemsTheSame(NotificationRecord notificationRecord, List<NewsItem> newsItems)
-    {
-        boolean isSame = true;
-        List<NotificationNewsItemRecord> notificationNewsItemRecords = notificationRecord.fetchNewsItemsIds();
-
-        int persistedNewsItemIdSize = notificationNewsItemRecords.size();
-        int newsItemIdsSize = newsItems.size();
-
-        if (persistedNewsItemIdSize == newsItemIdsSize)
-        {
-            // Assumption: Both collections are sorted
-            for (int i = 0; i < persistedNewsItemIdSize; i++)
-            {
-                String lhs =  notificationNewsItemRecords.get(i).getTitle();
-                String rhs = newsItems.get(i).getTitle();
-                if (lhs != null && rhs != null && lhs.equals(rhs))
-                {
-                    isSame = false;
-                    break;
-                }
-            }
-        }
-        else
-        {
-            isSame = false;
-        }
-        return isSame;
     }
 
     private void processSingleNotification(DealWatchRecord dealWatchRecord, NewsItem singleNewsItem)
     {
         // Check to see if this notification already exits
-        NotificationRecord existingNotification = NotificationRecord.getById(singleNewsItem.getLongDate());
+        NotificationRecord existingNotification = NotificationRecord.getByNewsItem(singleNewsItem);
 
         if (existingNotification != null)
         {
@@ -369,31 +284,21 @@ public class NotificationService
     private void generateSingleNotification(DealWatchRecord dealWatchRecord, NewsItem singleNewsItem)
     {
         // At this point, the news item has been vetted as unique, so proceed with creation
-        NotificationRecord newSingleNotificationRecord = new NotificationRecord();
-        newSingleNotificationRecord.setId(dealWatchRecord.getId());
-        newSingleNotificationRecord.setTitle(composeTitle(singleNewsItem.getTitle(), dealWatchRecord));
-        newSingleNotificationRecord.setSubTitle(singleNewsItem.getTitle());
-        newSingleNotificationRecord.setBody(singleNewsItem.getBody());
-        newSingleNotificationRecord.setUrl(singleNewsItem.getUrl());
-        newSingleNotificationRecord.setOwner(dealWatchRecord);
-        newSingleNotificationRecord.setReadFlag(NotificationRecord.UNREAD);
-        newSingleNotificationRecord.save();
+        notificationRecord = new NotificationRecord();
+        notificationRecord.setId(dealWatchRecord.getId());
+        notificationRecord.setTitle(composeTitle(singleNewsItem.getTitle(), dealWatchRecord));
+        notificationRecord.setSubTitle(singleNewsItem.getTitle());
+        notificationRecord.setBody(singleNewsItem.getBody());
+        notificationRecord.setUrl(singleNewsItem.getUrl());
+        notificationRecord.setOwner(dealWatchRecord);
+        notificationRecord.setReadFlag(NotificationRecord.UNREAD);
+        notificationRecord.save();
 
         NotificationNewsItemRecord singleNotificationNewsItemRecord = new NotificationNewsItemRecord();
-        singleNotificationNewsItemRecord.setOwner(newSingleNotificationRecord);
+        singleNotificationNewsItemRecord.setOwner(notificationRecord);
         singleNotificationNewsItemRecord.setNewsItemId(singleNewsItem.getId());
         singleNotificationNewsItemRecord.setTitle(singleNewsItem.getTitle());
         singleNotificationNewsItemRecord.save();
-
-
-        dispatch(newSingleNotificationRecord);
-    }
-
-    private void dispatch(NotificationRecord record)
-    {
-        List<NotificationRecord> queue = new ArrayList<NotificationRecord>();
-        queue.add(record);
-        new DispatchNotificationCommand(context, queue).execute();
     }
 
     /**
@@ -412,7 +317,7 @@ public class NotificationService
         // Primary - Is there a dollar amount
         Matcher m = DispatchNotificationCommand.pricePattern.matcher(title);
         List<String> amts = new ArrayList<>();
-        while(m.find())
+        while (m.find())
         {
             amts.add(m.group());
         }
@@ -426,7 +331,7 @@ public class NotificationService
         {
             // Secondary - Is there  a percentage amount?
             m = discountPattern.matcher(title);
-            while(m.find())
+            while (m.find())
             {
                 amts.add(m.group());
             }

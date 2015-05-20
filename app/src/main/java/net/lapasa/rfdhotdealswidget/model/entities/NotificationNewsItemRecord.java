@@ -10,7 +10,9 @@ import com.orm.dsl.Table;
 public class NotificationNewsItemRecord extends SugarRecord
 {
 
+    String body;
     String title;
+    String keywords;
     NotificationRecord owner;
     long newsItemId;
 
@@ -47,6 +49,27 @@ public class NotificationNewsItemRecord extends SugarRecord
     public void setTitle(String title)
     {
         this.title = title;
+    }
+
+    public String getBody()
+    {
+        return body;
+    }
+
+    public void setBody(String body)
+    {
+        this.body = body;
+    }
+
+
+    public String getKeywords()
+    {
+        return keywords;
+    }
+
+    public void setKeywords(String keywords)
+    {
+        this.keywords = keywords;
     }
 
 }

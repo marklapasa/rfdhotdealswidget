@@ -19,6 +19,7 @@ public class NotificationRecord extends SugarRecord
 {
     public static final long UNREAD = 0L;
     public static final long READ = 1L;
+    public static final String _IDLIST = "list of ids";
     private long readFlag = UNREAD;
     public static final String _ID = "id";
     private DealWatchRecord owner;
@@ -261,5 +262,22 @@ public class NotificationRecord extends SugarRecord
         String whereClause = "owner = ?";
         String[] whereArgs = new String[]{String.valueOf(owner.getId())};
         setCount(NotificationNewsItemRecord.count(NotificationNewsItemRecord.class, whereClause, whereArgs));
+    }
+
+    public static NotificationRecord getByNewsItem(NewsItem singleNewsItem)
+    {
+        String whereClause = "news_item_id = ?";
+        String[] whereArgs = new String[]{String.valueOf(singleNewsItem.getId())};
+        List<NotificationNewsItemRecord> notificationNewsItemRecords = NotificationNewsItemRecord.find(NotificationNewsItemRecord.class, whereClause, whereArgs);
+
+        if (notificationNewsItemRecords != null && notificationNewsItemRecords.size() > 0)
+        {
+            NotificationNewsItemRecord notificationNewsItemRecord = notificationNewsItemRecords.get(0);
+            return notificationNewsItemRecord.getOwner();
+        }
+        else
+        {
+            return null;
+        }
     }
 }
