@@ -46,8 +46,8 @@ import java.util.List;
  */
 class DealsRemoteViewsFactory implements RemoteViewsService.RemoteViewsFactory
 {
-	private int targetLayoutId = Utils.getNewsItemLayout();
 	private static final String TAG = DealsRemoteViewsFactory.class.getName();
+	private final Utils utils;
 	private Context context;
 	private int widgetId;
 	private List<NewsItem> list = new ArrayList<NewsItem>();
@@ -61,6 +61,7 @@ class DealsRemoteViewsFactory implements RemoteViewsService.RemoteViewsFactory
 		widgetId = intent.getIntExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, AppWidgetManager.INVALID_APPWIDGET_ID);
 		prefs = context.getSharedPreferences(DealsWidgetProvider.NAMESPACE + widgetId, Context.MODE_PRIVATE);
 		Log.d(TAG, "Created DealsRemoteViewsFactory for widgetId = " + widgetId);
+		this.utils = new Utils();
 	}
 
 	/**
@@ -101,12 +102,12 @@ class DealsRemoteViewsFactory implements RemoteViewsService.RemoteViewsFactory
 		NewsItem newsItem = list.get(position);
 
 		// List row item layout
-		RemoteViews rv = new RemoteViews(context.getPackageName(), targetLayoutId);
+		RemoteViews rv = new RemoteViews(context.getPackageName(), utils.getNewsItemLayout());
 
 		// Change the new indicator tag on the upper right side
 		setIndicator(newsItem, rv);
 
-		if (targetLayoutId == R.layout.news_item)
+		if (utils.getNewsItemLayout() == R.layout.news_item)
 		{
 			setThumbnailOnNewsItem(newsItem.getThumbnail(), rv);
 		}

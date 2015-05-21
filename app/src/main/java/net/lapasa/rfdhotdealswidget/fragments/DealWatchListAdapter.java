@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.database.DataSetObserver;
 import android.graphics.Bitmap;
+import android.graphics.drawable.Drawable;
 import android.text.Spannable;
 import android.text.SpannableString;
 import android.view.View;
@@ -13,6 +14,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.squareup.picasso.Picasso;
+import com.squareup.picasso.Target;
 
 import net.lapasa.rfdhotdealswidget.R;
 import net.lapasa.rfdhotdealswidget.Utils;
@@ -21,7 +23,6 @@ import net.lapasa.rfdhotdealswidget.model.entities.DealWatchRecord;
 import net.lapasa.rfdhotdealswidget.model.entities.TermSpanRecord;
 import net.lapasa.rfdhotdealswidget.services.DispatchNotificationCommand;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -30,8 +31,8 @@ import java.util.Set;
 public class DealWatchListAdapter extends BaseExpandableListAdapter
 {
     private static final String HAS_OPENED_BEFORE = "firstExpansion";
-    private int targetLayoutId = Utils.getNewsItemLayout();
     private final Context context;
+    private final Utils utils;
     List<DealWatchRecord> records;
     private List<NewsItem> cachedNewsItems = new ArrayList<NewsItem>();
     final SharedPreferences sharedPreferences;
@@ -41,6 +42,7 @@ public class DealWatchListAdapter extends BaseExpandableListAdapter
         this.records = new ArrayList<DealWatchRecord>();
         this.context = context;
         sharedPreferences = context.getSharedPreferences(DealWatchListFragment.class.getName(), Context.MODE_PRIVATE);
+        this.utils = new Utils();
     }
 
     public void addCachedNewsRecords(List<NewsItem> items)
@@ -215,6 +217,7 @@ public class DealWatchListAdapter extends BaseExpandableListAdapter
 */
 
 
+
         // Clear
         return v;
     }
@@ -230,28 +233,32 @@ public class DealWatchListAdapter extends BaseExpandableListAdapter
         View v = convertView;
         if (v == null)
         {
-            v = View.inflate(context, targetLayoutId, null);
+            v = View.inflate(context, R.layout.deal_watch_news_item, null);
         }
 
         TextView titleTextView = (TextView) v.findViewById(R.id.title);
         TextView bodyTextView = (TextView) v.findViewById(R.id.body);
         TextView dateTextView = (TextView) v.findViewById(R.id.date);
+        ImageView imageView = (ImageView) v.findViewById(R.id.image);
 
         titleTextView.setText(null);
         bodyTextView.setText(null);
         dateTextView.setText(null);
+        imageView.setImageDrawable(null);
 
         String formattedTitle = newsItem.getTitle(); //applySpans(newsItem.getTitle(), record.getResults());
         titleTextView.setText(formattedTitle);
-        bodyTextView.setMaxLines(1000);
+//        bodyTextView.setMaxLines(1000);
 //        bodyTextView.setFilters(new InputFilter[]{});
         bodyTextView.setText(newsItem.getBody());
-        dateTextView.setText(newsItem.getFormattedDate(context));
 
-        if (targetLayoutId == R.layout.news_item)
-        {
-//            setThumbnailOnNewsItem(newsItem.getThumbnail(), (ImageView) v.findViewById(R.id.image));
-        }
+
+
+        String formattedDate = newsItem.getFormattedDate(context);
+        dateTextView.setText(formattedDate);
+        setThumbnailOnNewsItem(newsItem.getThumbnail(), (ImageView) v.findViewById(R.id.image));
+
+        groupByTime(childPosition, dateTextView, formattedDate, record.filteredNewsItems);
 
         // Clear
         return v;
@@ -268,23 +275,35 @@ public class DealWatchListAdapter extends BaseExpandableListAdapter
         return sb.toString();
     }
 
-    private void setThumbnailOnNewsItem(String thumbnailUrl, ImageView imageView)
+    private void setThumbnailOnNewsItem(String thumbnailUrl, final ImageView imageView)
     {
-        if (thumbnailUrl != null)
+        Target t = new Target()
         {
-            Bitmap bitmap;
-            try
+            @Override
+            public void onBitmapLoaded(Bitmap bitmap, Picasso.LoadedFrom from)
             {
-                // TODO: This 200, 200 stuff needs to put into dimens file
-                bitmap = Picasso.with(context).load(thumbnailUrl).resize(200, 200).centerInside().get();
                 imageView.setImageBitmap(bitmap);
                 imageView.setVisibility(View.VISIBLE);
             }
-            catch (IOException e)
+
+            @Override
+            public void onBitmapFailed(Drawable errorDrawable)
             {
                 imageView.setImageBitmap(null);
                 imageView.setVisibility(View.GONE);
             }
+
+            @Override
+            public void onPrepareLoad(Drawable placeHolderDrawable)
+            {
+
+            }
+        };
+
+
+        if (thumbnailUrl != null)
+        {
+            Picasso.with(context).load(thumbnailUrl).resize(200, 200).centerInside().into(t);
         }
         else
         {
@@ -305,4 +324,33 @@ public class DealWatchListAdapter extends BaseExpandableListAdapter
         super.registerDataSetObserver(observer);
     }
 
+    /**
+     * Create illusion of grouping by time
+     *
+     * @param position
+     * @param dateHeader
+     * @param dateStrCurrent
+     */
+    private void groupByTime(int position, View dateHeader, String dateStrCurrent, List<NewsItem> list)
+    {
+        if (position > 0)
+        {
+            NewsItem prevNewsItem =  list.get(position - 1);
+            String dateStrPrevious = prevNewsItem.getFormattedDate(context);
+
+
+            if (dateStrCurrent.equals(dateStrPrevious))
+            {
+                dateHeader.setVisibility(View.GONE);
+            }
+            else
+            {
+                dateHeader.setVisibility(View.VISIBLE);
+            }
+        }
+        else
+        {
+            dateHeader.setVisibility(View.VISIBLE);
+        }
+    }
 }
