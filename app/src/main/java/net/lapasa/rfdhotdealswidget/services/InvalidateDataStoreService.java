@@ -51,6 +51,7 @@ import nl.matshofman.saxrssreader.RssReader;
 public class InvalidateDataStoreService extends IntentService
 {
     private final String DELETE = "delete";
+    private final String CANCEL = "cancel";
     private static final String RSS_HOT_DEALS = "http://forums.redflagdeals.com/external.php?type=RSS2&forumids=9";
     private static final String TAG = InvalidateDataStoreService.class.getName();
     private int widgetId;
@@ -223,7 +224,7 @@ public class InvalidateDataStoreService extends IntentService
 
     private boolean isValidItem(RssItem rssItem)
     {
-        return !containsIgnoreCase(rssItem.getTitle(), DELETE);
+        return !containsIgnoreCase(rssItem.getTitle(), DELETE) && !containsIgnoreCase(rssItem.getTitle(), CANCEL);
     }
 
     /**
