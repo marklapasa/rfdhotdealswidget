@@ -48,7 +48,7 @@ import nl.matshofman.saxrssreader.RssReader;
 
 public class InvalidateDataStoreService extends IntentService
 {
-	private static final String RSS_HOT_DEALS = "http://forums.redflagdeals.com/external.php?type=RSS2&forumids=9";
+	private static final String RSS_HOT_DEALS = "http://forums.redflagdeals.com/feed/forum/9";
 	private static final String TAG = InvalidateDataStoreService.class.getName();
 	private int widgetId;
 	private NewsItemsDTO dto;
