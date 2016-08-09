@@ -29,4 +29,5 @@ dependencies {
     compile project(':sugar')
     compile "com.splitwise:tokenautocomplete:1.3.3@aar"
     testCompile 'junit:junit:4.10'
+    compile 'com.einmalfel:earl:1.0.0'
 }

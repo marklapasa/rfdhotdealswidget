@@ -27,24 +27,25 @@ import android.os.IBinder;
 import android.util.Log;
 
 import com.androidbook.salbcr.LightedGreenRoom;
+import com.einmalfel.earl.EarlParser;
+import com.einmalfel.earl.Feed;
+import com.einmalfel.earl.Item;
 
 import net.lapasa.rfdhotdealswidget.DealsWidgetProvider;
 import net.lapasa.rfdhotdealswidget.R;
 import net.lapasa.rfdhotdealswidget.model.NewsItem;
 import net.lapasa.rfdhotdealswidget.model.NewsItemsDTO;
 
-import org.xml.sax.SAXException;
+import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-
-import nl.matshofman.saxrssreader.RssFeed;
-import nl.matshofman.saxrssreader.RssItem;
-import nl.matshofman.saxrssreader.RssReader;
+import java.util.zip.DataFormatException;
 
 public class InvalidateDataStoreService extends IntentService
 {
@@ -144,7 +145,11 @@ public class InvalidateDataStoreService extends IntentService
 			{
 
 				URL url = getUrl();
-				RssFeed feed = RssReader.read(url);
+
+				InputStream inputStream = url.openConnection().getInputStream();
+				Feed feed = EarlParser.parseOrThrow(inputStream, 0);
+				Log.i(TAG, "Processing feed: " + feed.getTitle());
+				List<Item> rssItems = (List<Item>) feed.getItems();
 
 				/*
 				 * // Set the feed title Editor editor = prefs.edit();
@@ -154,8 +159,8 @@ public class InvalidateDataStoreService extends IntentService
 				 */
 
 				// These are the items that have been downloaded
-				ArrayList<RssItem> rssItems = feed.getRssItems();
-				for (RssItem rssItem : rssItems)
+
+				for (Item rssItem : rssItems)
 				{
 					NewsItem ni = new NewsItem(rssItem, widgetId);
 					Log.i(TAG, ni.toString(context));
@@ -173,16 +178,22 @@ public class InvalidateDataStoreService extends IntentService
 			footerMsg = "RSS Feed URL Invalid (" + e.getClass().getName() + ")";
 			isDataAvailable = false;
 		}
-		catch (SAXException e)
+		catch (IOException e)
+		{
+			e.printStackTrace();
+			footerMsg = "Check Network Connection (" + e.getClass().getName() + ")";
+			isDataAvailable = false;
+		}
+		catch (DataFormatException e)
 		{
 			e.printStackTrace();
 			footerMsg = "Cannot parse RSS Feed (" + e.getClass().getName() + ")";
 			isDataAvailable = false;
 		}
-		catch (IOException e)
+		catch (XmlPullParserException e)
 		{
 			e.printStackTrace();
-			footerMsg = "Check Network Connection (" + e.getClass().getName() + ")";
+			footerMsg = "Cannot parse RSS Feed (" + e.getClass().getName() + ")";
 			isDataAvailable = false;
 		}
 

@@ -18,12 +18,12 @@ package net.lapasa.rfdhotdealswidget.model;
 import android.content.Context;
 import android.text.format.DateUtils;
 
+import com.einmalfel.earl.Item;
+
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import nl.matshofman.saxrssreader.RssItem;
 
 /**
  * A wrapper for RssItem
@@ -41,7 +41,7 @@ public class NewsItem implements Comparable<NewsItem>
 	
 	private long id;
 	private static final String TAG = NewsItem.class.getName();
-	private RssItem rssItem;
+	private Item rssItem;
 	private static SimpleDateFormat sdfDate = new SimpleDateFormat("MMM d");
 	private static SimpleDateFormat sdfTime = new SimpleDateFormat("h:mm aa");
 	private Date date;
@@ -58,7 +58,7 @@ public class NewsItem implements Comparable<NewsItem>
 		this(null, widgetId);
 	}	
 
-	public NewsItem(RssItem rssItem, long widgetId)
+	public NewsItem(Item rssItem, long widgetId)
 	{
 		this.rssItem = rssItem;
 		this.widgetId = widgetId;
@@ -67,14 +67,15 @@ public class NewsItem implements Comparable<NewsItem>
 		{
 			title = rssItem.getTitle();
 			url = rssItem.getLink();
-			setDate(rssItem.getPubDate().getTime());
-			body = parseBody(rssItem.getDescription());
+			setDate(rssItem.getPublicationDate().getTime());
+
 			unreadFlag = UNREAD;
 			String imgUrlStr = extractImgUrlStr();
 			if (imgUrlStr != null)
 			{
 				setThumbnail(imgUrlStr);
 			}
+			body = parseBody(rssItem.getDescription());
 		}
 	}
 
@@ -113,8 +114,19 @@ public class NewsItem implements Comparable<NewsItem>
 	
 	private String parseBody(String desc)
 	{
-		String workingText = desc.replaceAll("http.*?\\s", " ");
-		workingText = workingText.replace("\n", "").replace("\r", "");
+/*		String workingText = desc.replaceAll("http.*?\\s", " ");
+		workingText = workingText.replace("<br>", "");
+		workingText = workingText.replace("<p>", "");
+		workingText = workingText.replace("</p>", "");
+		workingText = workingText.replace("\n", "");
+		workingText = workingText.replace("\r", "");*/
+
+		// 9. HTML tag Regular Expression Pattern
+		String workingText = desc.replaceAll("<(\"[^\"]*\"|'[^']*'|[^'\">])*>", "");
+
+		// 10. HTML links Regular Expression Pattern
+		workingText = workingText.replaceAll("(?i)<a([^>]+)>(.+?)</a>","");
+
 		workingText = workingText.trim();
 		return workingText;
 	}
