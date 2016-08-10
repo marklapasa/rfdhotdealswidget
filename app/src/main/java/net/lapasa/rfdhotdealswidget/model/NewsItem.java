@@ -114,18 +114,13 @@ public class NewsItem implements Comparable<NewsItem>
 	
 	private String parseBody(String desc)
 	{
-/*		String workingText = desc.replaceAll("http.*?\\s", " ");
-		workingText = workingText.replace("<br>", "");
-		workingText = workingText.replace("<p>", "");
-		workingText = workingText.replace("</p>", "");
-		workingText = workingText.replace("\n", "");
-		workingText = workingText.replace("\r", "");*/
-
 		// 9. HTML tag Regular Expression Pattern
 		String workingText = desc.replaceAll("<(\"[^\"]*\"|'[^']*'|[^'\">])*>", "");
 
 		// 10. HTML links Regular Expression Pattern
 		workingText = workingText.replaceAll("(?i)<a([^>]+)>(.+?)</a>","");
+
+		workingText = workingText.replaceAll("&quot;","\"");
 
 		workingText = workingText.trim();
 		return workingText;
@@ -168,6 +163,7 @@ public class NewsItem implements Comparable<NewsItem>
 	
 	public void setTitle(String title)
 	{
+		title = title.replaceAll("&quot;", "\"");
 		this.title = title;
 	}
 	

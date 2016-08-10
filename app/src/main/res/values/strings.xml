@@ -43,5 +43,5 @@
     <string name="edit_filter">Edit Filter</string>
     <string name="checking_rss_feed">Checking RSS Feed..</string>
     <string name="deal_watch">Deal Watch</string>
-    <string name="sub_title">Get Keyword Alerts</string>
+    <string name="sub_title">Keyword Alerts</string>
 </resources>

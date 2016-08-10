@@ -29,7 +29,6 @@ public class DealWatchListFragment extends Fragment
     private ExpandableListView expandibleListView;
     private DealWatchListAdapter adapter;
     private int lastExpandedPosition;
-    private boolean hasOpenedGroup;
     private NewsItemsDTO newsItemDTO;
     private String sortPreference = DealWatchRecord.SORT_ALPHABETICALLY_ASC;
     private DealWatchActivity activity;
@@ -78,6 +77,20 @@ public class DealWatchListFragment extends Fragment
                     expandibleListView.collapseGroup(lastExpandedPosition);
                 }
                 lastExpandedPosition = groupPosition;
+
+                // Update subtitle
+                DealWatchRecord record = (DealWatchRecord) adapter.getGroup(groupPosition);
+                String whereClause = "\"" + record.keywords + "\"";
+                activity.getSupportActionBar().setSubtitle(whereClause);
+            }
+        });
+
+        expandibleListView.setOnGroupCollapseListener(new ExpandableListView.OnGroupCollapseListener()
+        {
+            @Override
+            public void onGroupCollapse(int groupPosition)
+            {
+                activity.getSupportActionBar().setSubtitle(R.string.sub_title);
             }
         });
 
