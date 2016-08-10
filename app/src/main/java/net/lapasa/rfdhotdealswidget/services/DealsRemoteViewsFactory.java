@@ -32,8 +32,8 @@ import android.widget.RemoteViewsService;
 import com.squareup.picasso.Picasso;
 
 import net.lapasa.rfdhotdealswidget.DealsWidgetProvider;
-import net.lapasa.rfdhotdealswidget.NewsItem;
 import net.lapasa.rfdhotdealswidget.R;
+import net.lapasa.rfdhotdealswidget.model.NewsItem;
 import net.lapasa.rfdhotdealswidget.model.NewsItemsDTO;
 
 import java.io.IOException;
@@ -251,7 +251,7 @@ class DealsRemoteViewsFactory implements RemoteViewsService.RemoteViewsFactory
 
 
         // Query for all cached news items that have the targetWidgetId
-        List<NewsItem> newsItems = dto.getAll(widgetId);
+        List<NewsItem> newsItems = dto.getAllByWidgetId(widgetId);
         if (newsItems.size() > 0)
         {
             Log.i(TAG, "onDataSetChanged(): Persisted data is available, clearing list");
