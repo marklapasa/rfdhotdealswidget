@@ -3,6 +3,11 @@ RFD Hot Deals Widget
 
 Use this widget to get a list of the latest hot deals on RedFlagDeals. It's open source, no Ads and it's free!
 
+v3.01
+- Replaced nl.matshofman.saxrssreader library in favor of com.einmalfel.earl Atom parser
+- Updated RSS URL for Hot Deals to reflect July 2016 changes to source feed
+- Upgraded to Gradle 2.1.2
+
 v3.00
 - Migrated to Android Studio
 

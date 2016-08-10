@@ -1,0 +1,52 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+      xmlns:app="http://schemas.android.com/apk/res-auto"
+      xmlns:tools="http://schemas.android.com/tools"
+      tools:context="net.lapasa.rfdhotdealswidget.DealWatchActivity">
+
+    <item
+        android:id="@+id/action_add_filter"
+        android:title="ADD"
+        android:orderInCategory="100"
+        app:showAsAction="always"
+        android:icon="@drawable/ic_action_action_alarm_add"/>
+    <!--
+        <item
+            android:id="@+id/action_expand_all"
+            android:title="Expand All"
+            android:orderInCategory="100"
+            app:showAsAction="never"/>
+
+
+        <item
+            android:id="@+id/action_collapse_all"
+            android:title="Collapse All"
+            android:orderInCategory="100"
+            app:showAsAction="never"/>
+    -->
+    <item
+        android:id="@+id/action_sort_alphabetically"
+        android:title="Sort Alphabetically"
+        android:orderInCategory="100"
+        app:showAsAction="never"/>
+
+
+    <item
+        android:id="@+id/action_sort_by_expiration"
+        android:title="Sort By Expiration"
+        android:orderInCategory="100"
+        app:showAsAction="never"/>
+
+    <!--
+    <item
+        android:id="@+id/action_group_by_enabled"
+        android:title="Group By Enabled"
+        android:orderInCategory="100"
+        app:showAsAction="never"/>
+    -->
+    <item
+        android:id="@+id/action_reset"
+        android:title="Reset"
+        android:orderInCategory="100"
+        app:showAsAction="never"/>
+
+</menu>

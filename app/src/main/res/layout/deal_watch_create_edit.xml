@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:padding="20dp"
+            android:background="#ffffff">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+
+
+        <!-- Keywords -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Keywords"/>
+
+        <EditText
+            android:id="@+id/keywords"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:hint="Enter keywords"
+            android:textCursorDrawable="@null"
+            android:backgroundTint="@color/red">
+            <requestFocus/>
+        </EditText>
+
+        <!-- Type -->
+        <TextView
+            android:paddingTop="20dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Type"/>
+
+        <RadioGroup
+            android:id="@+id/typeRadioGroup"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:buttonTint="@color/red">
+
+            <RadioButton
+                android:id="@+id/OR_filter"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="OR - Match some keywords"
+                android:buttonTint="@color/red"/>
+
+
+            <RadioButton
+                android:id="@+id/AND_filter"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="AND - Match all keywords"
+                android:buttonTint="@color/red"/>
+
+            <RadioButton
+                android:id="@+id/EXACT_filter"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Exact"
+                android:buttonTint="@color/red"/>
+
+        </RadioGroup>
+
+        <!-- Expiration -->
+
+        <TextView
+            android:paddingTop="20dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Expiration"/>
+
+        <RadioGroup
+            android:id="@+id/expirationRadioGroup"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:buttonTint="@color/red">
+
+            <RadioButton
+                android:id="@+id/_30days"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="30 Days"
+                android:buttonTint="@color/red"/>
+
+            <RadioButton
+                android:id="@+id/_90days"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="90 days"
+                android:buttonTint="@color/red"/>
+
+            <RadioButton
+                android:id="@+id/_1year"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="1 Year"
+                android:buttonTint="@color/red"/>
+
+            <RadioButton
+                android:id="@+id/customDate"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Custom"
+                android:buttonTint="@color/red"/>
+        </RadioGroup>
+
+        <DatePicker
+            android:id="@+id/customDatePicker"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:visibility="gone"
+            android:backgroundTint="@color/red"
+            android:foregroundTint="@color/red"/>
+
+    </LinearLayout>
+</ScrollView>

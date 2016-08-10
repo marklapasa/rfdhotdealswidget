@@ -48,8 +48,7 @@
             android:paddingLeft="13dp"
             android:paddingRight="3dp"
             android:paddingTop="3dp"
-            android:layout_centerVertical="true"
-            android:visibility="gone"/>
+            android:layout_centerVertical="true"/>
 
         <!-- Title -->
 
@@ -61,7 +60,7 @@
             android:paddingLeft="13dp"
             android:paddingRight="13dp"
             android:paddingTop="3dp"
-            android:textColor="#000000"
+            android:textColor="#fff"
             android:textSize="11sp"
             android:textStyle="bold" />
 
@@ -79,7 +78,7 @@
             android:paddingBottom="3dp"
             android:paddingLeft="13dp"
             android:paddingRight="16dp"
-            android:textColor="#000000"
+            android:textColor="#fff"
             android:textSize="11sp" />
 
         <!-- New NewsItem Indicator -->

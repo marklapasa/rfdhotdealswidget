@@ -15,12 +15,6 @@
  ******************************************************************************/
 package net.lapasa.rfdhotdealswidget;
 
-import java.util.Arrays;
-import java.util.Date;
-
-import net.lapasa.rfdhotdealswidget.services.InvalidateDataStoreService;
-import net.lapasa.rfdhotdealswidget.services.MarkNewsItemReadService;
-import net.lapasa.rfdhotdealswidget.services.RefreshUIService;
 import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.app.PendingIntent.CanceledException;
@@ -28,7 +22,6 @@ import android.appwidget.AppWidgetManager;
 import android.appwidget.AppWidgetProvider;
 import android.content.ComponentName;
 import android.content.Context;
-import android.content.ContextWrapper;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
@@ -39,6 +32,18 @@ import android.view.View;
 import android.widget.RemoteViews;
 
 import com.androidbook.salbcr.LightedGreenRoom;
+
+import net.lapasa.rfdhotdealswidget.model.NewsItemsDTO;
+import net.lapasa.rfdhotdealswidget.model.entities.DealWatchRecord;
+import net.lapasa.rfdhotdealswidget.model.entities.NotificationNewsItemRecord;
+import net.lapasa.rfdhotdealswidget.model.entities.NotificationRecord;
+import net.lapasa.rfdhotdealswidget.model.entities.TermSpanRecord;
+import net.lapasa.rfdhotdealswidget.services.InvalidateDataStoreService;
+import net.lapasa.rfdhotdealswidget.services.MarkNewsItemReadService;
+import net.lapasa.rfdhotdealswidget.services.RefreshUIService;
+
+import java.util.Arrays;
+import java.util.Date;
 
 /**
  * Broadcast receiver responsible for initiating the startup of the Deals Widget
@@ -58,6 +63,8 @@ public class DealsWidgetProvider extends AppWidgetProvider
 	public static final String REFRESH_ACTION_AUTOMATIC = "net.lapasa.rfdhotdealswidget.REFRESH_ACTION";
 	public static final String REFRESH_ACTION_MANUAL = "net.lapasa.rfdhotdealswidget.REFRESH_MANUAL";
 	public static final String UPDATE_UI = "net.lapasa.rfdhotdealswidget.UPDATE_UI";
+	private static final String SYNC_CODE = "net.lapasa.rfdhotdealswidget.SYNC_CODE";
+	public static final String UPDATE_SYNC_ICON = "net.lapasa.rfdhotdealswidget.UPDATE_SYNC_ICON";;
 	public static SparseArray<String> suffix = new SparseArray<String>();
 
 	private static final String TAG = DealsWidgetProvider.class.getName();
@@ -83,9 +90,14 @@ public class DealsWidgetProvider extends AppWidgetProvider
 	private SharedPreferences prefs;
 	private PendingIntent collectionPendingIntent;
 
+	public static final int READY = 0;
+	public static final int IN_PROGRESS = 1;
+	public static final int ERROR = -1;
+	private int syncBtnState = 0;
+
 	/**
 	 * Whenever the user selects an item from the list, open the browser and
-	 * mark it as read
+	 * mark it as readFlag
 	 */
 	@Override
 	public void onReceive(Context context, Intent intent)
@@ -118,26 +130,39 @@ public class DealsWidgetProvider extends AppWidgetProvider
 		}
 		else if (action.contains(REFRESH_ACTION_PREFIX))
 		{
-			enableRefreshButtonVisiblity(false, context, widgetId);
+			enableRefreshButtonVisiblity(IN_PROGRESS, context, widgetId);
 			refreshDataStore(context, intent);
 		}
 		else if (action.equals(UPDATE_UI))
 		{
 			boolean isDataAvailable = intent.getBooleanExtra(IS_DATA_AVAILABLE, false);
 			refreshWidgetUI(context, action, widgetId, isDataAvailable);
-			enableRefreshButtonVisiblity(true, context, widgetId);
+			if (isDataAvailable)
+			{
+				enableRefreshButtonVisiblity(READY, context, widgetId);
+			}
+			else
+			{
+				enableRefreshButtonVisiblity(ERROR, context, widgetId);
+			}
 		}
 		else if (action.equals(UPDATE_STATUS_FOOTER))
 		{
 			String msg = intent.getStringExtra(METADATA);
 			updateStatusFooterOnly(context, widgetId, msg);
 		}
+		else if (action.equals(UPDATE_SYNC_ICON))
+		{
+			String codeStr = intent.getStringExtra(METADATA);
+			int code = Integer.valueOf(codeStr);
+			enableRefreshButtonVisiblity(code, context, widgetId);
+		}
 
 		super.onReceive(context, intent);
 	}
 
 	/**
-	 * Mark the news item as read because the user has touched the row on the list
+	 * Mark the news item as readFlag because the user has touched the row on the list
 	 * then launch a browser window for the link associated to this news item
 	 * 
 	 * @param context
@@ -161,18 +186,27 @@ public class DealsWidgetProvider extends AppWidgetProvider
 		context.startActivity(i);
 	}
 
-	private void enableRefreshButtonVisiblity(boolean b, Context context, int widgetId)
+	private void enableRefreshButtonVisiblity(int code, Context context, int widgetId)
 	{
 		rv = new RemoteViews(context.getPackageName(), R.layout.widget_layout);
-		if (b)
+		switch(code)
 		{
-			rv.setViewVisibility(R.id.refreshIndicator, View.GONE);
-			rv.setViewVisibility(R.id.downloadBtn, View.VISIBLE);			
-		}
-		else
-		{
-			rv.setViewVisibility(R.id.refreshIndicator, View.VISIBLE);
-			rv.setViewVisibility(R.id.downloadBtn, View.GONE);
+			case READY:
+				rv.setViewVisibility(R.id.downloadBtn, View.VISIBLE);
+				rv.setViewVisibility(R.id.problemIndicator, View.GONE);
+				rv.setViewVisibility(R.id.refreshIndicator, View.GONE);
+				break;
+			case IN_PROGRESS:
+				rv.setViewVisibility(R.id.downloadBtn, View.GONE);
+				rv.setViewVisibility(R.id.problemIndicator, View.GONE);
+				rv.setViewVisibility(R.id.refreshIndicator, View.VISIBLE);
+				break;
+			case ERROR:
+				rv.setViewVisibility(R.id.downloadBtn, View.GONE);
+				rv.setViewVisibility(R.id.problemIndicator, View.VISIBLE);
+				rv.setViewVisibility(R.id.refreshIndicator, View.GONE);
+
+				break;
 		}
 
 		AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(context);
@@ -281,7 +315,6 @@ public class DealsWidgetProvider extends AppWidgetProvider
 	 * 
 	 * @param context
 	 * @param widgetId
-	 * @param intent
 	 */
 	private void updateStatusFooterOnly(Context context, int widgetId, String msg)
 	{
@@ -392,6 +425,11 @@ public class DealsWidgetProvider extends AppWidgetProvider
 			refreshBtnIntent.setData(Uri.parse(refreshBtnIntent.toUri(Intent.URI_INTENT_SCHEME)));
 			PendingIntent refreshIntent = PendingIntent.getBroadcast(context, 0, refreshBtnIntent, PendingIntent.FLAG_CANCEL_CURRENT);
 			rv.setOnClickPendingIntent(R.id.downloadBtn, refreshIntent);
+			rv.setOnClickPendingIntent(R.id.problemIndicator, refreshIntent);
+
+			Intent dealWatchIntent = new Intent(context, DealWatchActivity.class);
+			PendingIntent pendingDealWatchIntent = PendingIntent.getActivity(context, 0, dealWatchIntent, PendingIntent.FLAG_CANCEL_CURRENT);
+			rv.setOnClickPendingIntent(R.id.dealWatchBtn, pendingDealWatchIntent);
 
 			// Set Alarm to update this widget
 			setRepeatingRefreshAlarm(context, widgetId, DEFAULT_REFRESH_FREQUENCY);
@@ -541,4 +579,33 @@ public class DealsWidgetProvider extends AppWidgetProvider
 		}
 	}
 
+	@Override
+	public void onDisabled(Context context)
+	{
+		NewsItemsDTO newsItemsDTO = new NewsItemsDTO(context);
+		newsItemsDTO.clearAll();
+
+		NotificationRecord.deleteAll(NotificationRecord.class);
+		NotificationNewsItemRecord.deleteAll(NotificationNewsItemRecord.class);
+		DealWatchRecord.deleteAll(DealWatchRecord.class);
+		TermSpanRecord.deleteAll(TermSpanRecord.class);
+
+		super.onDisabled(context);
+	}
+
+
+
+	@Override
+	public void onDeleted(Context context, int[] appWidgetIds)
+	{
+		NewsItemsDTO newsItemsDTO = new NewsItemsDTO(context);
+
+		for (int i = 0; i < appWidgetIds.length; i++)
+		{
+			int appWidgetId = appWidgetIds[i];
+			newsItemsDTO.deleteAllRecordsForWidget(appWidgetId);
+		}
+
+		super.onDeleted(context, appWidgetIds);
+	}
 }
