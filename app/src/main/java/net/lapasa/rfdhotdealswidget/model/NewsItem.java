@@ -121,6 +121,7 @@ public class NewsItem implements Comparable<NewsItem>
 		workingText = workingText.replaceAll("(?i)<a([^>]+)>(.+?)</a>","");
 
 		workingText = workingText.replaceAll("&quot;","\"");
+		workingText = workingText.replaceAll("&amp;","\"");
 
 		workingText = workingText.trim();
 		return workingText;
@@ -164,6 +165,9 @@ public class NewsItem implements Comparable<NewsItem>
 	public void setTitle(String title)
 	{
 		title = title.replaceAll("&quot;", "\"");
+		title = title.replaceAll("&amp;","&");
+		title = title.replaceAll("Hot Deals • ", "");
+
 		this.title = title;
 	}
 	
