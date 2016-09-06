@@ -256,7 +256,12 @@ class DealsRemoteViewsFactory implements RemoteViewsService.RemoteViewsFactory
         {
             Log.i(TAG, "onDataSetChanged(): Persisted data is available, clearing list");
             list.clear();
-            list.addAll(newsItems);
+
+            // Marshmallow hack
+            for(NewsItem item : newsItems)
+            {
+                list.add(item);
+            }
         }
         else
         {

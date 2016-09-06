@@ -1,15 +1,15 @@
 apply plugin: 'com.android.application'
 
 android {
-    compileSdkVersion 21
+    compileSdkVersion 23
     buildToolsVersion "21.1.2"
 
     defaultConfig {
         applicationId "net.lapasa.rfdhotdealswidget"
         minSdkVersion 19
-        targetSdkVersion 21
-        versionCode 27
-        versionName "3.01"
+        targetSdkVersion 23
+        versionCode 28
+        versionName "3.02"
     }
     buildTypes {
         release {
@@ -23,7 +23,7 @@ android {
 dependencies {
 
 //    compile 'com.android.support:appcompat-v7:23.4.0'
-    compile 'com.android.support:appcompat-v7:21.0.3'
+    compile 'com.android.support:appcompat-v7:23.4.0'
     compile 'com.squareup.picasso:picasso:2.5.2'
     compile 'com.google.android.gms:play-services:6.5.87'
     compile project(':sugar')

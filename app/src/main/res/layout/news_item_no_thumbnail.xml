@@ -94,7 +94,7 @@
                     android:layout_width="16dp"
                     android:layout_height="wrap_content"
                     android:paddingLeft="2dp"
-                    android:text="NEW!"
+                    android:text="NEW"
                     android:textColor="#ffffff"
                     android:textSize="6sp" />
             </RelativeLayout>
@@ -126,7 +126,7 @@
                 android:layout_height="wrap_content"
                 android:paddingLeft="2dp"
                 android:paddingRight="2dp"
-                android:text="NEW!"
+                android:text="NEW"
                 android:textColor="#ffffff"
                 android:textSize="6sp"
                 android:visibility="invisible" />

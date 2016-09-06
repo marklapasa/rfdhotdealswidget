@@ -47,7 +47,7 @@
             android:title="Purge Cached Items Threshold" />
 
         <EditTextPreference
-            android:defaultValue="http://forums.redflagdeals.com/external.php?type=RSS2&amp;forumids=9"
+            android:defaultValue="http://forums.redflagdeals.com/feed/forum/9"
             android:dialogTitle="Enter RSS Feed URL"
             android:key="@string/key_rssfeedurl"
             android:summary="@string/summary_rss_feed_url"
