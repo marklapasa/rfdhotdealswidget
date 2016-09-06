@@ -28,7 +28,7 @@
             android:value="deal_watch.db"/>
         <meta-data
             android:name="VERSION"
-            android:value="4"/>
+            android:value="6"/>
         <meta-data
             android:name="DOMAIN_PACKAGE_NAME"
             android:value="net.lapasa.rfdhotdealswidget.model.entities"/>
