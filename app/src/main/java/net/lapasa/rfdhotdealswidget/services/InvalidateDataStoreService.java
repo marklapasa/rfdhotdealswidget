@@ -38,10 +38,14 @@ import net.lapasa.rfdhotdealswidget.model.NewsItemsDTO;
 
 import org.xmlpull.v1.XmlPullParserException;
 
+import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -146,8 +150,24 @@ public class InvalidateDataStoreService extends IntentService
 
 				URL url = getUrl();
 
+
+				// mlapasa: There are better ways of parsing atom feed, this is not one of them but this is quite the hack
+				// to get around parsing \n, \r, and \t
 				InputStream inputStream = url.openConnection().getInputStream();
-				Feed feed = EarlParser.parseOrThrow(inputStream, 0);
+				BufferedReader r = new BufferedReader(new InputStreamReader(inputStream));
+				StringBuilder total = new StringBuilder();
+				String line;
+				while ((line = r.readLine()) != null) {
+					total.append(line).append('\n');
+				}
+				String feedStr = total.toString();
+				feedStr = feedStr.replaceAll("\n","").replaceAll("\r","").replaceAll("\t","").replaceAll("<t>","").replaceAll("</t>", "");
+
+				InputStream stream = new ByteArrayInputStream(feedStr.getBytes(StandardCharsets.UTF_8));
+
+
+
+				Feed feed = EarlParser.parseOrThrow(stream, 0);
 				Log.i(TAG, "Processing feed: " + feed.getTitle());
 				List<Item> rssItems = (List<Item>) feed.getItems();
 
