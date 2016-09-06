@@ -8,8 +8,8 @@ android {
         applicationId "net.lapasa.rfdhotdealswidget"
         minSdkVersion 19
         targetSdkVersion 23
-        versionCode 28
-        versionName "3.02"
+        versionCode 29
+        versionName "3.03"
     }
     buildTypes {
         release {

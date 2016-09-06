@@ -207,10 +207,15 @@ public class NewsItemsDTO
 		long id = updateStatment.executeUpdateDelete();
 		
 		Cursor cursor = getCursorById(id);
-		
+
+		NewsItem updatedNewsItem = null;
 		cursor.moveToFirst();
-		NewsItem updatedNewsItem = cursorToNewsItem(cursor);
-		
+
+		if (cursor.getCount() > 0)
+		{
+			updatedNewsItem = cursorToNewsItem(cursor);
+		}
+
 		cursor.close();
 		close();
 		
