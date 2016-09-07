@@ -23,7 +23,10 @@ import net.lapasa.rfdhotdealswidget.model.entities.DealWatchRecord;
 import net.lapasa.rfdhotdealswidget.model.entities.TermSpanRecord;
 import net.lapasa.rfdhotdealswidget.services.DispatchNotificationCommand;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -48,7 +51,7 @@ public class DealWatchListAdapter extends BaseExpandableListAdapter
     public void addCachedNewsRecords(List<NewsItem> items)
     {
         cachedNewsItems.clear();
-        cachedNewsItems.addAll(deduplicate(items));
+        cachedNewsItems.addAll(deduplicateByDate(items));
     }
 
     /**
@@ -78,6 +81,35 @@ public class DealWatchListAdapter extends BaseExpandableListAdapter
         }
 
         return cachedNewsItems;
+    }
+
+
+    private List<NewsItem> deduplicateByDate(List<NewsItem> cachedNewsItems)
+    {
+        DateFormat df = new SimpleDateFormat("MM/dd/yyyy HH:mm:ss");
+
+        List<NewsItem> blacklist = new ArrayList<>();
+        Set<String> existingDateStrings = new HashSet<String>();
+        for (NewsItem newsItem : cachedNewsItems)
+        {
+            String cachedNewsItemDateStr = df.format(newsItem.getDate());
+            if (existingDateStrings.contains(cachedNewsItemDateStr))
+            {
+                blacklist.add(newsItem);
+            }
+            else
+            {
+                existingDateStrings.add(cachedNewsItemDateStr);
+            }
+        }
+
+        for (NewsItem newsItem : blacklist)
+        {
+            cachedNewsItems.remove(newsItem);
+        }
+
+        return cachedNewsItems;
+
     }
 
 

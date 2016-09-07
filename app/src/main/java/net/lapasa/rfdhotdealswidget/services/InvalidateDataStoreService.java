@@ -27,6 +27,7 @@ import android.os.IBinder;
 import android.util.Log;
 
 import com.androidbook.salbcr.LightedGreenRoom;
+import com.einmalfel.earl.AtomEntry;
 import com.einmalfel.earl.EarlParser;
 import com.einmalfel.earl.Feed;
 import com.einmalfel.earl.Item;
@@ -182,7 +183,7 @@ public class InvalidateDataStoreService extends IntentService
 
 				for (Item rssItem : rssItems)
 				{
-					NewsItem ni = new NewsItem(rssItem, widgetId);
+					NewsItem ni = new NewsItem((AtomEntry)rssItem, widgetId);
 					Log.i(TAG, ni.toString(context));
 					downloadedNewsItems.add(ni);
 				}

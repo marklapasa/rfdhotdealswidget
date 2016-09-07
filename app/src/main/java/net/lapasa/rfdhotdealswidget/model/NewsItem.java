@@ -18,6 +18,7 @@ package net.lapasa.rfdhotdealswidget.model;
 import android.content.Context;
 import android.text.format.DateUtils;
 
+import com.einmalfel.earl.AtomEntry;
 import com.einmalfel.earl.Item;
 
 import java.text.SimpleDateFormat;
@@ -52,30 +53,30 @@ public class NewsItem implements Comparable<NewsItem>
 	private long longDate;
 	private long widgetId;
 	private String thumbnailUrl;
-	
+	private long updateDate;
+
 	public NewsItem(long widgetId)
 	{
 		this(null, widgetId);
-	}	
+	}
 
-	public NewsItem(Item rssItem, long widgetId)
-	{
+	public NewsItem(AtomEntry rssItem, long widgetId) {
 		this.rssItem = rssItem;
 		this.widgetId = widgetId;
-		
-		if (rssItem != null)
-		{
+
+		if (rssItem != null) {
 			title = rssItem.getTitle();
 			url = rssItem.getLink();
-			setDate(rssItem.getPublicationDate().getTime());
+			setPubDate(rssItem.getPublicationDate().getTime());
 
 			unreadFlag = UNREAD;
 			String imgUrlStr = extractImgUrlStr();
-			if (imgUrlStr != null)
-			{
+			if (imgUrlStr != null) {
 				setThumbnail(imgUrlStr);
 			}
 			body = parseBody(rssItem.getDescription());
+
+			setUpdateDate(rssItem.updated.date.getTime());
 		}
 	}
 
@@ -181,7 +182,7 @@ public class NewsItem implements Comparable<NewsItem>
 		return this.date;
 	}
 
-	public void setDate(long date)
+	public void setPubDate(long date)
 	{
 		this.date = new Date(date);
 		this.setLongDate(date);
@@ -236,5 +237,14 @@ public class NewsItem implements Comparable<NewsItem>
 	public String toString(Context context)
 	{
 		return this.getTitle() + " | " + this.getFormattedDate(context);
+	}
+
+	public void setUpdateDate(long updateDate) {
+		this.updateDate = updateDate;
+	}
+
+	public long getUpdateDate()
+	{
+		return this.updateDate;
 	}
 }

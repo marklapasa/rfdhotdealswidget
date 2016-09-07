@@ -120,7 +120,7 @@ public class NewsItemsDTO
 		newsItem.setTitle(cursor.getString(1));
 		newsItem.setUrl(cursor.getString(2));
 		long long1 = cursor.getLong(3);
-		newsItem.setDate(long1);
+		newsItem.setPubDate(long1);
 		String body = cursor.getString(4);
 		Log.i(TAG, "Body == " + body);
 		newsItem.setBody(body);
@@ -298,56 +298,63 @@ public class NewsItemsDTO
 	 * Exclude NewsItem that have already been persisted, based on 
 	 * publication date (pubDate)
 	 * 
-	 * @param newNewsItems
+	 * @param recentNewsItems
 	 * @return
 	 */
-	private List<NewsItem> removeDuplicates(List<NewsItem> newNewsItems, int widgetId)
+	private List<NewsItem> removeDuplicates(List<NewsItem> recentNewsItems, int widgetId)
 	{
-		int originalSize = newNewsItems.size();
-		List<NewsItem> persistedItems = getAllByWidgetId(widgetId);
+		int originalSize = recentNewsItems.size();
+		List<NewsItem> persistedItems = getAllByWidgetId(widgetId); // Get all old records
+		List<NewsItem> flaggedForRemoval = new ArrayList<>();
 		
-		
-		
+
 		if(persistedItems.size() > 0)
 		{
 			markAllAsNotNew(persistedItems);
-			NewsItem newNewsItem = null;
+			NewsItem recentNewsItem = null;
 			
 			for (int i = originalSize - 1; i >= 0; i--)
 			{
-				newNewsItem = newNewsItems.get(i);
-				String rawTitle = newNewsItem.getTitle();
+				recentNewsItem = recentNewsItems.get(i);
+				long recentPubDate = recentNewsItem.getLongDate();
 				
-				
-				String pTitleRemove = null;
-				
-				for (NewsItem nItem : persistedItems)
+				for (NewsItem persistedItem : persistedItems)
 				{
-					String persistedTitle = nItem.getTitle();
-					if (persistedTitle.equals(rawTitle))
+					long persistedPubDate = persistedItem.getLongDate();
+					if (recentPubDate == persistedPubDate)
 					{
-						pTitleRemove = persistedTitle;
-						Log.e(TAG, "persistedTitle->" + newNewsItem.toString(context));
-						newNewsItems.remove(i);
-						break;
+						if (recentNewsItem.getUpdateDate() > persistedItem.getUpdateDate())
+						{
+							flaggedForRemoval.add(persistedItem);
+							break;
+						}
 					}
 				}
 				
-				if (pTitleRemove != null)
-				{
-					persistedItems.remove(pTitleRemove);
-				}
 			}
-			
-			Log.d(TAG, "There were " + (originalSize - newNewsItems.size()) + " removed from RSS Response");			
 		}
-		else
+
+		if (flaggedForRemoval.size() > 0)
 		{
-			Log.d(TAG, "No duplicates, these news items are unique");
-		}		
-			
-		return newNewsItems;
+			removeFromDB(flaggedForRemoval);
+		}
+		return recentNewsItems;
 		
+	}
+
+	private void removeFromDB(List<NewsItem> itemsToRemove)
+	{
+		long[] idsList = getIdsFromList(itemsToRemove);
+		String idsListStr = Arrays.toString(idsList);
+		idsListStr = idsListStr.substring(1, idsListStr.length() - 1);
+
+		final String sql = "DELETE FROM " + NewsItemSQLHelper.TABLE_NEWS_ITEMS + " WHERE _id IN (" + idsListStr + ")";
+		open();
+		SQLiteStatement updateStatment = database.compileStatement(sql);
+		long count = updateStatment.executeUpdateDelete();
+		close();
+
+
 	}
 	
 
@@ -357,7 +364,7 @@ public class NewsItemsDTO
 		String idsListStr = Arrays.toString(idsList);
 		idsListStr = idsListStr.substring(1, idsListStr.length() - 1);
 		
-		String sql = "UPDATE " + NewsItemSQLHelper.TABLE_NEWS_ITEMS + " SET "  +
+		final String sql = "UPDATE " + NewsItemSQLHelper.TABLE_NEWS_ITEMS + " SET "  +
 				NewsItemSQLHelper.IS_UNREAD + " = " + NewsItem.UNREAD+
 				" WHERE _id IN (" + idsListStr + ") AND " + NewsItemSQLHelper.IS_UNREAD + " = " + NewsItem.NEW_AND_UNREAD;
 
